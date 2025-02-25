@@ -16,6 +16,7 @@ conn = sqlite3.connect("database.db", check_same_thread=False)
 
 login_manager = LoginManager()
 app = Flask(__name__)
+app.secret_key = "12345abcdefgh"
 login_manager.init_app(app)
 
 
@@ -78,7 +79,7 @@ def login():
             user = cur.fetchone()
             if not user:
                 return render_template("accounts/login.html", msg="INVALID PASSWORD")
-            user= User.get(user[0])
+            user= User.get(user[0], conn)
             login_user(user, remember=remember)
             next = request.args.get('next')
             return redirect(next or url_for('slash'))
@@ -87,7 +88,7 @@ def login():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.get(user_id, conn=conn)
 
 @app.route("/logout")
 @login_required
@@ -98,7 +99,7 @@ def logout():
 @app.route("/")
 @login_required
 def slash():
-    return render_template("index.html")
+    return render_template("home/index.html")
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host="0.0.0.0")

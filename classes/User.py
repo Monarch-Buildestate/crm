@@ -1,8 +1,7 @@
 from flask_login import UserMixin   
+
 import sqlite3
 
-
-conn = sqlite3.connect("../database.db")
 
 class User(UserMixin):
 
@@ -20,7 +19,7 @@ class User(UserMixin):
         return self.id
 
     @staticmethod
-    def get(user_id):
+    def get(user_id, conn:sqlite3.Connection):
         # load the config file
         with conn:
             cur = conn.cursor()
