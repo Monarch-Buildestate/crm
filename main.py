@@ -133,10 +133,15 @@ def slash():
 def lead(lead_id:int=None):
     if not lead_id:
         leads = current_user.get_leads(conn)
+        print(leads)
+        if leads:
+            # print attr
+            [print(lead.__dict__) for lead in leads]
+        #leads = [lead.json() for lead in leads]
         return render_template("lead/lead.html", leads=leads)
     else:
         lead = Lead.get(lead_id, conn)
-        return render_template("lead/lead.html", lead=lead)
+        return render_template("lead/details.html", lead=lead)
     
 @app.route("/lead/create", methods=["POST", "GET"])
 @login_required 

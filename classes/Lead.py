@@ -17,6 +17,7 @@ class Lead:
             self.comments = self.get_comments(conn)
             self.follow_ups = self.get_follow_ups(conn)
         self.events = sorted(self.comments + self.follow_ups, key=lambda x: x.time)
+        self.created_at = query[6]
     
     def get_comments(self, conn:sqlite3.Connection):
         with conn:
@@ -48,3 +49,16 @@ class Lead:
                 return None
             return Lead(lead)
         return None
+    
+    def json(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "name": self.name,
+            "phone_number": self.phone_number,
+            "email": self.email,
+            "address": self.address,
+            "comments": [c.json() for c in self.comments],
+            "follow_ups": [fu.json() for fu in self.follow_ups],
+            "created_at": self.created_at
+        }

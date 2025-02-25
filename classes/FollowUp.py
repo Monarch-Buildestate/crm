@@ -12,3 +12,13 @@ class FollowUp:
         self.created_at = datetime.fromtimestamp(query[5])
         self.time = self.created_at
         
+    def json(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "lead_id": self.lead_id,
+            "follow_up_date": self.follow_up_date,
+            "follow_up_time": self.follow_up_time,
+            "created_at": self.created_at
+        }   
+

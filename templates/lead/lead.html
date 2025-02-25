@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} UI Timeline {% endblock %} 
+{% block title %} Tables Data {% endblock %} 
 
 <!-- Element injected in the BODY element -->
 {% block body_class %} {% endblock body_class %} 
@@ -12,12 +12,15 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
 
 {% endblock stylesheets %}
 
-{% block content %}
+{% block content %} 
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -26,12 +29,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Timeline</h1>
+            <h1>DataTables</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Timeline</li>
+              <li class="breadcrumb-item active">DataTables</li>
             </ol>
           </div>
         </div>
@@ -41,39 +44,48 @@
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
-
-        <!-- Timelime example  -->
         <div class="row">
-          <div class="col-md-12">
-            <!-- The time line -->
-            <div class="timeline">
-              <!-- timeline time label -->
-              <div class="time-label">
-                <span class="bg-red">10 Feb. 2014</span>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Leads</h3>
               </div>
-              <div>
-                <i class="fas fa-comments bg-yellow"></i>
-                <div class="timeline-item">
-                  <span class="time"><i class="fas fa-clock"></i> 27 mins ago</span>
-                  <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>
-                  <div class="timeline-body">
-                    Take me to your leader!
-                    Switzerland is small and neutral!
-                    We are more like Germany, ambitious and misunderstood!
-                  </div>
-                </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="leads" class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Created At</th>
+                      <th>Updated At</th>
+                    </tr>
+                  </thead>
+                  {% for lead in leads %}
+                    <tr>
+                      <td>{{ lead.id }}</td>
+                      <td>{{ lead.name }}</td>
+                      <td>{{ lead.email }}</td>
+                      <td>{{ lead.phone_number }}</td>
+                      <td>{{ lead.created_at }}</td>
+                      <td>{{ lead.updated_at }}</td>
+                    </tr>
+                  {% endfor %}
+                </table>
               </div>
+              <!-- /.card-body -->
             </div>
+            <!-- /.card -->
           </div>
           <!-- /.col -->
         </div>
+        <!-- /.row -->
       </div>
-      <!-- /.timeline -->
-
+      <!-- /.container-fluid -->
     </section>
     <!-- /.content -->
   </div>
-  <!-- /.content-wrapper -->
 
 {% endblock content %}
 
@@ -84,9 +96,23 @@
   <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
   <!-- Bootstrap 4 -->
   <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- DataTables -->
+  <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
   <!-- AdminLTE App -->
   <script src="/static/assets/js/adminlte.min.js"></script>
   <!-- AdminLTE for demo purposes -->
   <script src="/static/assets/js/demo.js"></script>
+  <!-- page script -->
+  <script>
+    $(function () {
+      $("#leads").DataTable({
+        "responsive": true,
+        "autoWidth": true,
+      });
+    });
+  </script>
 
 {% endblock javascripts %}
