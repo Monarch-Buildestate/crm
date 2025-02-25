@@ -2,6 +2,8 @@ import sqlite3
 from .Comment import Comment
 from .FollowUp import FollowUp
 
+conn = sqlite3.connect("database.db", check_same_thread=False)
+
 
 class Lead:
     def __init__(self, query):
@@ -11,8 +13,10 @@ class Lead:
         self.phone_number = query[3]
         self.email = query[4]
         self.address = query[5]
-        self.comments = self.get_comments()
-        self.follow_ups = self.get_follow_ups()
+        with conn:
+            self.comments = self.get_comments(conn)
+            self.follow_ups = self.get_follow_ups(conn)
+        self.events = sorted(self.comments + self.follow_ups, key=lambda x: x.time)
     
     def get_comments(self, conn:sqlite3.Connection):
         with conn:

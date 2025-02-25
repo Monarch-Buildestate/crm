@@ -1,5 +1,5 @@
 
-
+from datetime import datetime
 
 class FollowUp:
     def __init__(self, query):
@@ -9,4 +9,6 @@ class FollowUp:
         self.lead_id = query[2]
         self.follow_up_date = query[3]
         self.follow_up_time = query[4]
+        self.created_at = datetime.fromtimestamp(query[5])
+        self.time = self.created_at
         

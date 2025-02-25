@@ -128,13 +128,33 @@ def slash():
     return render_template("home/index.html")
 
 @app.route("/lead/<lead_id>")
+@app.route("/lead")
 @login_required
-def lead(lead_id:None):
-
+def lead(lead_id:int=None):
     if not lead_id:
         leads = current_user.get_leads(conn)
         return render_template("lead/lead.html", leads=leads)
-    return render_template("lead/lead.html")
+    else:
+        lead = Lead.get(lead_id, conn)
+        return render_template("lead/lead.html", lead=lead)
+    
+@app.route("/lead/create", methods=["POST", "GET"])
+@login_required 
+def create_lead():
+    if request.method == "POST":
+        name = request.form["name"]
+        phone_number = request.form["number"]
+        if len(phone_number) == 10:
+            phone_number = "91" + phone_number
+        
+        email = request.form["email"]
+        address = request.form["city"]
+        with conn:
+            cur = conn.cursor()
+            cur.execute("INSERT INTO lead (user_id, name, phone_number, email, address) VALUES (?,?,?,?,?)", (current_user.id, name, phone_number, email, address))
+            conn.commit()
+        return redirect(url_for("lead"))
+    return render_template("lead/create.html")
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host="0.0.0.0")

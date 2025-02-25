@@ -24,46 +24,7 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-          <li class="nav-item has-treeview {% if 'index' in segment %} menu-open {% endif %}">
-            <a href="#" class="nav-link {% if 'index' in segment %} active {% endif %}">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Dashboard
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="/index.html" class="nav-link {% if 'index.html' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v1</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/index2.html" class="nav-link {% if 'index2.html' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v2</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/index3.html" class="nav-link {% if 'index3.html' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v3</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a href="widgets.html" class="nav-link {% if 'widgets' in segment %} active {% endif %}">
-              <i class="nav-icon fas fa-th"></i>
-              <p>
-                Widgets
-                <span class="right badge badge-danger">New</span>
-              </p>
-            </a>
-          </li>
+          <!--
           <li class="nav-item has-treeview {% if 'layout' in segment %} menu-open {% endif %}">
             <a href="#" class="nav-link {% if 'layout' in segment %} active {% endif %}">
               <i class="nav-icon fas fa-copy"></i>
@@ -122,8 +83,34 @@
               </p>
             </a>
           </li>
+          </li>-->
+          <li class="nav-item">
+            <a href="/" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Dashboard
+                <span class="badge badge-info right"></span>
+              </p>
+            </a>
           </li>
-          
+          <li class="nav-item">
+            <a href="/lead" class="nav-link">
+              <i class="nav-icon fa fa-phone"></i>
+              <p>
+                Calls
+                <span class="badge badge-info right"></span>
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/lead" class="nav-link">
+              <i class="nav-icon fa fa-users"></i>
+              <p>
+                Leads
+                <span class="badge badge-info right"></span>
+              </p>
+            </a>
+          </li>
       </nav>
       <!-- /.sidebar-menu -->
     </div>
