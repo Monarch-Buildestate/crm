@@ -53,8 +53,11 @@ with conn:
     )
     conn.commit()
     # follow ups
-    cur.execute("CREATE TABLE IF NOT EXISTS follow_ups(id INTEGER PRIMARY KEY, user_id INTEGER, lead_id INTEGER, follow_up_date TEXT, follow_up_time TEXT, FOREIGN KEY(user_id) REFERENCES users(id), FOREIGN KEY(lead_id) REFERENCES lead(id))")
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS follow_ups(id INTEGER PRIMARY KEY, user_id INTEGER, lead_id INTEGER, follow_up_date TEXT, follow_up_time TEXT, FOREIGN KEY(user_id) REFERENCES users(id), FOREIGN KEY(lead_id) REFERENCES lead(id))"
+    )
     conn.commit()
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -66,9 +69,9 @@ def login():
             compare_against = "email"
         elif any(char.isdigit() for char in given_username):
             compare_against = "phone_number"
-        else:   
+        else:
             compare_against = "username"
-    
+
         # set cookies to this password
         with conn:
             cur = conn.cursor()
@@ -79,16 +82,18 @@ def login():
             user = cur.fetchone()
             if not user:
                 return render_template("accounts/login.html", msg="INVALID PASSWORD")
-            user= User.get(user[0], conn)
+            user = User.get(user[0], conn)
             login_user(user, remember=remember)
-            next = request.args.get('next')
-            return redirect(next or url_for('slash'))
+            next = request.args.get("next")
+            return redirect(next or url_for("slash"))
     else:
         return render_template("accounts/login.html")
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.get(user_id, conn=conn)
+
 
 @app.route("/logout")
 @login_required
@@ -96,10 +101,12 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
+
 @app.route("/")
 @login_required
 def slash():
     return render_template("home/index.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host="0.0.0.0")

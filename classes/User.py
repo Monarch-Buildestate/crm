@@ -1,4 +1,4 @@
-from flask_login import UserMixin   
+from flask_login import UserMixin
 
 import sqlite3
 
@@ -19,7 +19,7 @@ class User(UserMixin):
         return self.id
 
     @staticmethod
-    def get(user_id, conn:sqlite3.Connection):
+    def get(user_id, conn: sqlite3.Connection):
         # load the config file
         with conn:
             cur = conn.cursor()
@@ -30,4 +30,3 @@ class User(UserMixin):
             user_id, username, password, phone_number, email, position = user
             return User(user_id, username, password, phone_number, email, position)
         return None
-    
