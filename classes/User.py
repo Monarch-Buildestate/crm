@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from .Lead import Lead
 
 import sqlite3
 
@@ -30,3 +31,13 @@ class User(UserMixin):
             user_id, username, password, phone_number, email, position = user
             return User(user_id, username, password, phone_number, email, position)
         return None
+
+    def get_leads(self, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM lead WHERE user_id=?", (self.id,))
+            leads = cur.fetchall()
+            ls = []
+            for l in leads:
+                ls.append(Lead(l))
+        return ls

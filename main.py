@@ -10,6 +10,9 @@ from flask_login import (
 
 import sqlite3
 from classes.User import User
+from classes.Lead import Lead
+from classes.Comment import Comment 
+from classes.FollowUp import FollowUp
 
 
 conn = sqlite3.connect("database.db", check_same_thread=False)
@@ -35,26 +38,43 @@ with conn:
             "INSERT INTO users (username, password, email, position) VALUES ('admin', 'admin', 'admin@example.com', 1)"
         )
         conn.commit()
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS lead(id INTEGER PRIMARY KEY, user_id INTEGER, name TEXT, phone_nubmer TEXT, email TEXT, address TEXT, FOREIGN KEY(user_id) REFERENCES users(id))"
-    )  # assigned to that user. if not assigned then its assigned to admin
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS lead (
+            id INTEGER PRIMARY KEY, 
+            user_id INTEGER, 
+            name TEXT, 
+            phone_number TEXT, 
+            email TEXT, 
+            address TEXT, 
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );""")    
     conn.commit()
     cur.execute(
         """
-        CREATE TABLE IF NOT EXISTS comments(
+        CREATE TABLE IF NOT EXISTS comments (
             id INTEGER PRIMARY KEY, 
             user_id INTEGER, 
             lead_id INTEGER, 
             comment TEXT, 
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             FOREIGN KEY(user_id) REFERENCES users(id), 
             FOREIGN KEY(lead_id) REFERENCES lead(id)
-        )
+        );
     """
     )
     conn.commit()
     # follow ups
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS follow_ups(id INTEGER PRIMARY KEY, user_id INTEGER, lead_id INTEGER, follow_up_date TEXT, follow_up_time TEXT, FOREIGN KEY(user_id) REFERENCES users(id), FOREIGN KEY(lead_id) REFERENCES lead(id))"
+        """CREATE TABLE IF NOT EXISTS follow_ups (id INTEGER PRIMARY KEY, 
+            user_id INTEGER, 
+            lead_id INTEGER, 
+            follow_up_date TEXT, 
+            follow_up_time TEXT, 
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            FOREIGN KEY(user_id) REFERENCES users(id), 
+            FOREIGN KEY(lead_id) REFERENCES lead(id)
+        );"""
     )
     conn.commit()
 
@@ -107,6 +127,14 @@ def logout():
 def slash():
     return render_template("home/index.html")
 
+@app.route("/lead/<lead_id>")
+@login_required
+def lead(lead_id:None):
+
+    if not lead_id:
+        leads = current_user.get_leads(conn)
+        return render_template("lead/lead.html", leads=leads)
+    return render_template("lead/lead.html")
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host="0.0.0.0")
