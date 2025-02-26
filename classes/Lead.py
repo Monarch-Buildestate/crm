@@ -1,8 +1,14 @@
 import sqlite3
 from .Comment import Comment
 from .FollowUp import FollowUp
+import os
 
-conn = sqlite3.connect("database.db", check_same_thread=False)
+try:
+    os.chdir("/var/www/crm")
+except:
+    pass
+
+conn = sqlite3.connect("../database.db", check_same_thread=False)
 
 
 class Lead:
