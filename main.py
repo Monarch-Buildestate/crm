@@ -27,6 +27,10 @@ app.secret_key = "12345abcdefgh"
 login_manager.init_app(app)
 
 try:
+    os.chdir("/var/www/crm")
+except FileNotFoundError:
+    pass
+try:
     with open("config.json", "r") as f:
         config = json.load(f)
     tatatelekey = config.get("tata_tele_api_key", None)
