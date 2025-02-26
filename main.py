@@ -7,7 +7,7 @@ from flask_login import (
     logout_user,
     current_user,
 )
-
+import requests
 import sqlite3
 from classes.User import User
 from classes.Lead import Lead
@@ -28,10 +28,12 @@ login_manager.init_app(app)
 try:
     with open("config.json", "r") as f:
         config = json.load(f)
+    tatatelekey = config.get("tatatelekey", None)
 except FileNotFoundError:
     config = {}
     with open("config.json", "w+") as f:
         json.dump(config, f, indent=4)
+    tatatelekey = None
 
 with conn:
     cur = conn.cursor()
@@ -153,9 +155,7 @@ def create_timeline(lead: Lead):
 @login_required
 def lead(lead_id:int=None):
     if request.method == "POST":
-        new_name = request.form["name"]
-        print(request.form)
-        
+        new_name = request.form["name"]        
         """
         new_phone_number = request.form["number"]
         if len(new_phone_number) == 10:
@@ -222,6 +222,24 @@ def create_lead():
             conn.commit()
         return redirect(url_for("lead"))
     return render_template("lead/create.html")
+
+@app.route("/api/initiate_call", methods=["POST"])
+def initiate_call():
+    if not tatatelekey:
+        return "No key found"
+    agent_number = request.json.get("agent_number")
+    destination_number = request.json.get("destination_number")
+    url = "https://api-smartflo.tatateleservices.com/v1/click_to_call"
+    payload = { "async": 1, "agent_number": agent_number, "destination_number": destination_number, "get_call_id": 1 }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "Authorization": tatatelekey
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    print(response.text)
 
 @app.route("/api/dialplan", methods=["POST"])
 def dialplan():
