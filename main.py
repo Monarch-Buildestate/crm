@@ -122,7 +122,10 @@ def login():
             next = request.args.get("next")
             return redirect(next or url_for("slash"))
     else:
-        return render_template("accounts/login.html")
+        next = request.args.get('next', "")
+        if next:
+            next = f"?next={next}"
+        return render_template("accounts/login.html", next=next)
 
 
 @login_manager.user_loader
