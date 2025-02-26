@@ -48,4 +48,3 @@ class Call:
         self.transfer_missed_agent = dictionary.get("transfer_missed_agent")
         self.uuid = dictionary.get("uuid")
         self.voicemail_recording = dictionary.get("voicemail_recording")
-    

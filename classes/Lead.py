@@ -18,8 +18,8 @@ class Lead:
             self.follow_ups = self.get_follow_ups(conn)
         self.events = sorted(self.comments + self.follow_ups, key=lambda x: x.time)
         self.created_at = query[6]
-    
-    def get_comments(self, conn:sqlite3.Connection):
+
+    def get_comments(self, conn: sqlite3.Connection):
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT * FROM comments WHERE lead_id=?", (self.id,))
@@ -28,8 +28,8 @@ class Lead:
             for c in comments:
                 cs.append(Comment(c))
         return cs
-    
-    def get_follow_ups(self, conn:sqlite3.Connection):
+
+    def get_follow_ups(self, conn: sqlite3.Connection):
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT * FROM follow_ups WHERE lead_id=?", (self.id,))
@@ -37,10 +37,10 @@ class Lead:
             fus = []
             for fu in follow_ups:
                 fus.append(FollowUp(fu))
-        return fus  
-    
+        return fus
+
     @staticmethod
-    def get(lead_id, conn:sqlite3.Connection):
+    def get(lead_id, conn: sqlite3.Connection):
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT * FROM lead WHERE id=?", (lead_id,))
@@ -49,7 +49,7 @@ class Lead:
                 return None
             return Lead(lead)
         return None
-    
+
     def json(self):
         return {
             "id": self.id,
@@ -60,5 +60,5 @@ class Lead:
             "address": self.address,
             "comments": [c.json() for c in self.comments],
             "follow_ups": [fu.json() for fu in self.follow_ups],
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }

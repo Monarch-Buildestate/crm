@@ -41,7 +41,7 @@ class User(UserMixin):
             for l in leads:
                 ls.append(Lead(l))
         return ls
-    
+
     @staticmethod
     def get_all(conn: sqlite3.Connection):
         with conn:
@@ -51,4 +51,4 @@ class User(UserMixin):
             us = []
             for u in users:
                 us.append(User(*u))
-        return us   
+        return us

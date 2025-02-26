@@ -1,2 +1,4 @@
 *.pyc 
 classes/__pycache__/*
+config.json
+test.py
