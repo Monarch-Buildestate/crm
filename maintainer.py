@@ -40,7 +40,7 @@ def fetch_records(page=1):
         return response.json()
 
 go_for_front = False
-interval = 60
+interval = 120
 page_count = 0
 while True:
     # get oldest record  and length of records
@@ -86,3 +86,4 @@ while True:
                 print("Record already exists")
                 pass
         conn.commit()
+    sleep(interval)
