@@ -14,7 +14,7 @@ class User(UserMixin):
         self.phone_number = phone_number
         self.email = email
         self.position = position
-        self.admin = True if self.id == 0 else False
+        self.admin = True if self.id == 1 else False
 
     def get_id(self):
         return self.id
