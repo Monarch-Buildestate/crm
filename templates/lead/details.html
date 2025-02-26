@@ -85,7 +85,11 @@
                         {% if 'comment' in event %}
                           {{ event['comment'] }}
                         {% else %}
-                          {{ event['remarks'] }} - Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }}
+                          {% if event['follow_up_time'] %}
+                            {{ event['remarks'] }} Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }}
+                          {% else %}
+                            {{ event['remarks'] }}
+                          {% endif %}
                         {% endif %}
                       </div>
                     </div>
