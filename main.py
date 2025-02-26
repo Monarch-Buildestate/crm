@@ -96,6 +96,23 @@ with conn:
         );"""
     )
     conn.commit()
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS calls (
+            id TEXT PRIMARY KEY NOT NULL,
+            call_id TEXT,
+            uuid TEXT,
+            description TEXT,
+            call_time TIMESTAMP,
+            call_duration INTEGER,
+            agent_number TEXT,
+            client_number TEXT,
+            recording_url TEXT,
+            did_number TEXT,
+            status TEXT
+        )"""
+    )
+
+    conn.commit()
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -252,34 +269,10 @@ def create_lead():
 
 
 def get_call_details(agent_number=None):
-    url = "https://api-smartflo.tatateleservices.com/v1/call/records"
-    payload = {}
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "Authorization": tatatelekey,
-    }
-    print(config.get("did_number"))
-    response = requests.get(
-        url,
-        json=payload,
-        headers=headers,
-        params={"Authorization": tatatelekey, "did_number": config.get("did_number")},
-    )
-    if response.status_code != 200:
-        return []
-    with open("test.json", "w+") as f:
-        json.dump(response.json(), f, indent=4)
-    calls = response.json()
-    calls = calls.get("results")
-    calls = [Call(call) for call in calls]
-    if agent_number:
-        calls = [
-            call
-            for call in calls
-            if agent_number in call.agent_number or agent_number in call.client_number
-        ]
-    return calls
+    with conn:
+        cur.execute("SELECT * FROM calls WHERE agent_number=?", (agent_number,))
+        calls = cur.fetchall()
+        calls = [Call(call) for call in calls]
 
 
 def get_active_calls(): 
@@ -297,6 +290,7 @@ def get_active_calls():
         json.dump(response.json(), f, indent=4)
     calls = response.json()
     return render_template("call/active.html", calls=calls)
+
 @app.route("/calls/active")
 def active_calls():
     calls = get_active_calls()
