@@ -162,8 +162,9 @@ def logout():
 
 
 @app.route("/")
-@login_required
 def slash():
+    if not current_user.is_authenticated:
+        return redirect(url_for("login"))
     return render_template("home/index.html")
 
 
