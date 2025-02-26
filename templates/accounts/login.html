@@ -40,7 +40,7 @@
             {% endif %}
         </p>
 
-        <form method="post" action="">
+        <form method="post" action="{{ url_for('login') }}{{next}}">
           <div class="input-group mb-3">
             <input id="username" name="username" placeholder="Username" class="form-control" type="text">
             <div class="input-group-append">
