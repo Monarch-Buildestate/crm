@@ -154,6 +154,7 @@ def create_timeline(lead: Lead):
 def lead(lead_id:int=None):
     if request.method == "POST":
         new_name = request.form["name"]
+        print(request.form)
         
         """
         new_phone_number = request.form["number"]
@@ -191,10 +192,10 @@ def comment(lead_id):
 @app.route("/lead/<lead_id>/followup", methods=["POST"])
 @login_required
 def followup(lead_id):
-    print(request.form)
-    # 2025-02-26T05:46
     follow_up_time = datetime.strptime(request.form["follow-up-time"], "%Y-%m-%dT%H:%M")
     follow_up_user_id = request.form.get("follow_up_user_id", None)
+    if request.form.get("follow-up-select") == "no":
+        follow_up_time = None
     if not follow_up_user_id:
         follow_up_user_id = current_user.id
     remarks = request.form["remarks"]
