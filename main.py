@@ -275,9 +275,21 @@ def get_call_details(agent_number=None):
     return calls
 
 
-def get_active_calls(): ...
-
-
+def get_active_calls(): 
+    url = "https://api-smartflo.tatateleservices.com/v1/live_calls"
+    payload = {}
+    headers = {
+        "accept": "application/json",
+        "Authorization": tatatelekey
+    }
+    params = {"did_number": config.get("did_number")}   
+    response = requests.get(url, json=payload, headers=headers, params=params)
+    if response.status_code != 200:
+        return []
+    with open("test2.json", "w+") as f:
+        json.dump(response.json(), f, indent=4)
+    calls = response.json()
+    return render_template("call/active.html", calls=calls)
 @app.route("/calls/active")
 def active_calls():
     calls = get_active_calls()
@@ -298,8 +310,12 @@ def calls():
 def initiate_call():
     if not tatatelekey:
         return "No key found"
-    agent_number = request.json.get("agent_number")
-    destination_number = request.json.get("destination_number")
+    data = request.get_json()
+    agent_number = data.get('agent_number')
+    lead_id = data.get("lead_id")
+    if not agent_number or not lead_id:
+        return "Invalid data"
+    destination_number = Lead.get(int(lead_id), conn).phone_number
     url = "https://api-smartflo.tatateleservices.com/v1/click_to_call"
     payload = {
         "async": 1,
@@ -314,8 +330,7 @@ def initiate_call():
     }
 
     response = requests.post(url, json=payload, headers=headers)
-
-    print(response.text)
+    return response.json()
 
 
 @app.route("/api/dialplan", methods=["POST"])

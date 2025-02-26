@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Tables Data {% endblock %} 
+{% block title %} Active Call Data {% endblock %} 
 
 <!-- Element injected in the BODY element -->
 {% block body_class %} {% endblock body_class %} 
@@ -34,7 +34,7 @@
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">DataTables</li>
+              <li class="breadcrumb-item active">Call Details</li>
             </ol>
           </div>
         </div>
@@ -47,30 +47,32 @@
         <div class="row">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Leads</h3>
+                <h3 class="card-title">Active Call Details</h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <table id="leads" class="table table-bordered table-striped">
+                <table id="calldetails" class="table table-bordered table-striped">
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Created At</th>
-                      <th>Updated At</th>
+                      <th>From</th>
+                      <th>To</th>
+                      <th>Time</th>
+                      <th>Recording</th>
                     </tr>
                   </thead>
-                  {% for lead in leads %}
+                  {% for call in calls %}
                     <tr>
-                        <td>{{ lead.id }}</td>
-                        <td><a href="{{ url_for('lead', lead_id=lead.id) }}">{{ lead.name }}</td></a>
-                        <td>{{ lead.email }}</td>
-                        <td>{{ lead.phone_number }}</td>
-                        <td>{{ lead.created_at }}</td>
-                        <td>{{ lead.updated_at }}</td>
-                    </tr>
+                        <td>{{ call.call_id }}</td>
+                        <td>{{ call.agent_number }}</td>
+                        <td>{{ call.client_number}}</td>
+                        <td>{{ call.end_stamp }} IST</td>
+                        {% if call.recording_url %}
+                          <td><audio controls><source src={{call.recording_url}} type="audio/ogg"></audio></td>
+                        {% else %}
+                          <td>No Recording</td>
+                        {% endif %}
+                      </tr>
                   {% endfor %}
                 </table>
               </div>
@@ -108,7 +110,7 @@
   <!-- page script -->
   <script>
     $(function () {
-      $("#leads").DataTable({
+      $("#calldetails").DataTable({
         "responsive": true,
         "autoWidth": true,
       });

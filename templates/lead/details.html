@@ -99,7 +99,7 @@
             </div>
           </div>
           <div class="lead-details">
-            <h3>Lead Details</h3>
+            <h3>Lead Details ({{lead.id}})</h3>
             <form action="/lead/{{ lead.id }}" method="POST">
               <div class="form-group">
                 <label>Name</label>
@@ -119,6 +119,7 @@
               </div>
               <button class="btn btn-success">Save</button>
             </form>
+            <button class="btn btn-primary" onclick="call()">📞</button>
             <div class="follow-up-form">
               <h4>Add a Follow-Up</h4>
               <form action="/lead/{{ lead.id }}/followup" method="POST">
@@ -166,5 +167,29 @@
       followUpDate.style.display = followUpSelect.value === "yes" ? "block" : "none";
     }
     toggleFollowUpDate();
+    var agent_number = "{{ current_user.phone_number }}";
+    var lead_id = "{{ lead.id }}";
+    function call(){
+      // make a request to /api/initiate_call?agent_number=AGENT_NUMBER&lead_id=LEAD_ID
+      // on success show a toast message
+      // on failure show a toast message
+      fetch(`/api/initiate_call`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ agent_number, lead_id }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("Call initiated successfully");
+          } else {
+            alert("Failed to initiate call");
+          }
+        })
+        .catch(error => console.error("Error:", error));
+
+    }
   </script>
 {% endblock javascripts %}
