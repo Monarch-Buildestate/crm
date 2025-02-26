@@ -8,7 +8,7 @@ try:
 except:
     pass
 
-conn = sqlite3.connect("../database.db", check_same_thread=False)
+conn = sqlite3.connect("database.db", check_same_thread=False)
 
 
 class Lead:
