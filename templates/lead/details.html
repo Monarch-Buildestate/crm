@@ -2,26 +2,40 @@
 
 {% block title %} UI Timeline {% endblock %} 
 
-<!-- Element injected in the BODY element -->
-{% block body_class %} {% endblock body_class %} 
-
-<!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
-
-  <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
-  <!-- Theme style -->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
-
+  <style>
+    .timeline-container {
+      display: flex;
+      justify-content: space-between;
+    }
+    .timeline-box {
+      flex: 2;
+      padding: 10px;
+    }
+    .lead-details {
+      flex: 1;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+    .comment-box {
+      margin-bottom: 20px;
+    }
+    .follow-up-form {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+  </style>
 {% endblock stylesheets %}
 
 {% block content %}
-
-  <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
@@ -35,58 +49,110 @@
             </ol>
           </div>
         </div>
-      </div><!-- /.container-fluid -->
+      </div>
     </section>
 
-    <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
-
-        <!-- Timelime example  -->
-        <div class="row">
-          <div class="col-md-12">
-            <!-- The time line -->
+        <div class="timeline-container">
+          <div class="timeline-box">
+            <div class="comment-box">
+              <textarea class="form-control" placeholder="Add a new comment..."></textarea>
+              <button class="btn btn-primary mt-2">Submit</button>
+            </div>
             <div class="timeline">
-              <!-- timeline time label -->
-              <div class="time-label">
-                <span class="bg-red">10 Feb. 2014</span>
-              </div>
-              <div>
-                <i class="fas fa-comments bg-yellow"></i>
-                <div class="timeline-item">
-                  <span class="time"><i class="fas fa-clock"></i> 27 mins ago</span>
-                  <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>
-                  <div class="timeline-body">
-                    Take me to your leader!
-                    Switzerland is small and neutral!
-                    We are more like Germany, ambitious and misunderstood!
-                  </div>
+              {% for timestamp, event_list in events.items() %}
+                <div class="time-label">
+                  <span class="bg-red">{{ timestamp.strftime('%d %b %Y') }}</span>
                 </div>
-              </div>
+                {% for event in event_list %}
+                  <div>
+                    <i class="fas {% if 'comment' in event %}fa-comments bg-yellow{% else %}fa-reply bg-blue{% endif %}"></i>
+                    <div class="timeline-item">
+                      <span class="time"><i class="fas fa-clock"></i> {{ event['created_at'].strftime('%H:%M:%S') }}</span>
+                      <h3 class="timeline-header">
+                        {% if 'comment' in event %}
+                          Comment
+                        {% else %}
+                          Follow-Up
+                        {% endif %}
+                      </h3>
+                      <div class="timeline-body">
+                        {% if 'comment' in event %}
+                          {{ event['comment'] }}
+                        {% else %}
+                          {{ event['remarks'] }} - Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endfor %}
             </div>
           </div>
-          <!-- /.col -->
+          <div class="lead-details">
+            <h3>Lead Details</h3>
+            <form>
+              <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control" value="{{ lead.name }}">
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                {{ lead.phone_number }}
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" value="{{ lead.email }}">
+              </div>
+              <div class="form-group">
+                <label>Address</label>
+                <input type="text" class="form-control" value="{{ lead.address }}">
+              </div>
+              <button class="btn btn-success">Save</button>
+            </form>
+            <div class="follow-up-form">
+              <h4>Add a Follow-Up</h4>
+              <form>
+                <div class="form-group">
+                  <label>Follow Up?</label>
+                  <select class="form-control" id="follow-up-select" onchange="toggleFollowUpDate()">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div class="form-group" id="follow-up-date">
+                  <label>Follow-Up Time</label>
+                  <input type="datetime-local" class="form-control" id="follow-up-time" value="{{ current_time }}">
+                </div>
+                <div class="form-group">
+                  <label>Lead Status</label>
+                  <select class="form-control">
+                    {% for status in lead_status %}
+                      <option value="{{ status }}">{{ status }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <button class="btn btn-primary">Add Follow-Up</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
-      <!-- /.timeline -->
-
     </section>
-    <!-- /.content -->
   </div>
-  <!-- /.content-wrapper -->
-
 {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-
-  <!-- jQuery -->
   <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
   <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- AdminLTE App -->
   <script src="/static/assets/js/adminlte.min.js"></script>
-  <!-- AdminLTE for demo purposes -->
-  <script src="/static/assets/js/demo.js"></script>
-
+  <script>
+    function toggleFollowUpDate() {
+      var followUpSelect = document.getElementById("follow-up-select");
+      var followUpDate = document.getElementById("follow-up-date");
+      followUpDate.style.display = followUpSelect.value === "yes" ? "block" : "none";
+    }
+    toggleFollowUpDate();
+  </script>
 {% endblock javascripts %}

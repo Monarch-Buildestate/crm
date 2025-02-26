@@ -14,6 +14,9 @@ from classes.Lead import Lead
 from classes.Comment import Comment 
 from classes.FollowUp import FollowUp
 
+from datetime import datetime
+import os 
+import json
 
 conn = sqlite3.connect("database.db", check_same_thread=False)
 
@@ -22,8 +25,13 @@ app = Flask(__name__)
 app.secret_key = "12345abcdefgh"
 login_manager.init_app(app)
 
-
-# login and registration
+try:
+    with open("config.json", "r") as f:
+        config = json.load(f)
+except FileNotFoundError:
+    config = {}
+    with open("config.json", "w+") as f:
+        json.dump(config, f, indent=4)
 
 with conn:
     cur = conn.cursor()
@@ -66,11 +74,13 @@ with conn:
     conn.commit()
     # follow ups
     cur.execute(
-        """CREATE TABLE IF NOT EXISTS follow_ups (id INTEGER PRIMARY KEY, 
+        """CREATE TABLE IF NOT EXISTS follow_ups (
+            id INTEGER PRIMARY KEY, 
             user_id INTEGER, 
             lead_id INTEGER, 
-            follow_up_date TEXT, 
-            follow_up_time TEXT, 
+            follow_up_time TIMESTAMP,
+            follow_up_user_id INTEGER, 
+            remarks TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             FOREIGN KEY(user_id) REFERENCES users(id), 
             FOREIGN KEY(lead_id) REFERENCES lead(id)
@@ -127,22 +137,33 @@ def logout():
 def slash():
     return render_template("home/index.html")
 
+
+def create_timeline(lead: Lead):
+    if not lead.events:
+        return {}
+    timeline = {}
+    for event in lead.events:
+        print(event.created_at.date())
+        if event.created_at.date() not in timeline:
+            timeline[event.created_at.date()] = []
+        timeline[event.created_at.date()].append(event.json())
+    return timeline
+
 @app.route("/lead/<lead_id>")
 @app.route("/lead")
 @login_required
 def lead(lead_id:int=None):
     if not lead_id:
         leads = current_user.get_leads(conn)
-        print(leads)
-        if leads:
-            # print attr
-            [print(lead.__dict__) for lead in leads]
-        #leads = [lead.json() for lead in leads]
         return render_template("lead/lead.html", leads=leads)
     else:
         lead = Lead.get(lead_id, conn)
-        return render_template("lead/details.html", lead=lead)
-    
+        return render_template(
+            "lead/details.html", 
+            lead=lead, 
+            events=create_timeline(lead),
+            current_time= datetime.now().strftime('%Y-%m-%dT%H:%M'))
+        
 @app.route("/lead/create", methods=["POST", "GET"])
 @login_required 
 def create_lead():
@@ -160,6 +181,18 @@ def create_lead():
             conn.commit()
         return redirect(url_for("lead"))
     return render_template("lead/create.html")
+
+@app.route("/api/dialplan", methods=["POST"])
+def dialplan():
+    caller_id = request.args.get("caller_id_number")
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM lead WHERE phone_number=?", (caller_id,))
+        lead = cur.fetchone()
+        if not lead:
+            return "Failover"
+        lead = Lead(lead)
+        return [{"transfer":{"type":"number","data":[lead.agent.phone_number]}}]
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host="0.0.0.0")

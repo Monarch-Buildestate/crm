@@ -6,7 +6,8 @@ class Comment:
         self.user_id = query[1]
         self.lead_id = query[2]
         self.comment = query[3]
-        self.created_at = datetime.fromtimestamp(query[4])
+        # 2025-02-25 22:42:06
+        self.created_at = datetime.strptime(query[4], "%Y-%m-%d %H:%M:%S")
         self.time = self.created_at
     
     def json(self):
