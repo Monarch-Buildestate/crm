@@ -142,17 +142,31 @@ def create_timeline(lead: Lead):
     if not lead.events:
         return {}
     timeline = {}
-    for event in lead.events:
-        print(event.created_at.date())
+    for event in lead.events[::-1]: # reverse so that we see latest events first
         if event.created_at.date() not in timeline:
             timeline[event.created_at.date()] = []
         timeline[event.created_at.date()].append(event.json())
     return timeline
 
-@app.route("/lead/<lead_id>")
+@app.route("/lead/<lead_id>", methods=["POST", "GET"])
 @app.route("/lead")
 @login_required
 def lead(lead_id:int=None):
+    if request.method == "POST":
+        new_name = request.form["name"]
+        
+        """
+        new_phone_number = request.form["number"]
+        if len(new_phone_number) == 10:
+            new_phone_number = "91" + new_phone_number""" # phone number is not editable
+        new_email = request.form["email"]
+        new_address = request.form["address"]
+        with conn:
+            cur = conn.cursor()
+            cur.execute("UPDATE lead SET name=?, email=?, address=? WHERE id=?", (new_name, new_email, new_address, lead_id))
+            conn.commit()
+        return redirect(url_for("lead", lead_id=lead_id))
+
     if not lead_id:
         leads = current_user.get_leads(conn)
         return render_template("lead/lead.html", leads=leads)
@@ -163,7 +177,33 @@ def lead(lead_id:int=None):
             lead=lead, 
             events=create_timeline(lead),
             current_time= datetime.now().strftime('%Y-%m-%dT%H:%M'))
-        
+
+@app.route("/lead/<lead_id>/comment", methods=["POST"])
+@login_required
+def comment(lead_id):
+    comment = request.form["comment"]
+    with conn:
+        cur = conn.cursor()
+        cur.execute("INSERT INTO comments (user_id, lead_id, comment) VALUES (?,?,?)", (current_user.id, lead_id, comment))
+        conn.commit()
+    return redirect(url_for("lead", lead_id=lead_id))
+
+@app.route("/lead/<lead_id>/followup", methods=["POST"])
+@login_required
+def followup(lead_id):
+    print(request.form)
+    # 2025-02-26T05:46
+    follow_up_time = datetime.strptime(request.form["follow-up-time"], "%Y-%m-%dT%H:%M")
+    follow_up_user_id = request.form.get("follow_up_user_id", None)
+    if not follow_up_user_id:
+        follow_up_user_id = current_user.id
+    remarks = request.form["remarks"]
+    with conn:
+        cur = conn.cursor()
+        cur.execute("INSERT INTO follow_ups (user_id, lead_id, follow_up_time, follow_up_user_id, remarks) VALUES (?,?,?,?,?)", (current_user.id, lead_id, follow_up_time, follow_up_user_id, remarks))
+        conn.commit()
+    return redirect(url_for("lead", lead_id=lead_id))
+
 @app.route("/lead/create", methods=["POST", "GET"])
 @login_required 
 def create_lead():
