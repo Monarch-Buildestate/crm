@@ -1,50 +1,57 @@
+from datetime import datetime
 class Call:
-    def __init__(self, dictionary):
-        self.accountid = dictionary.get("accountid")
-        self.agent_hangup_data = dictionary.get("agent_hangup_data")
-        self.agent_name = dictionary.get("agent_name")
-        self.agent_number = dictionary.get("agent_number")
-        self.agent_number_with_prefix = dictionary.get("agent_number_with_prefix")
-        self.agent_ring_time = dictionary.get("agent_ring_time")
-        self.answered_seconds = dictionary.get("answered_seconds")
-        self.blocked_number_id = dictionary.get("blocked_number_id")
-        self.broadcast_id = dictionary.get("broadcast_id")
-        self.call_duration = dictionary.get("call_duration")
-        self.call_flow = dictionary.get("call_flow")
-        self.call_hint = dictionary.get("call_hint")
-        self.call_id = dictionary.get("call_id")
-        self.caller_id_num = dictionary.get("caller_id_num")
-        self.charges = dictionary.get("charges")
-        self.circle = dictionary.get("circle")
-        self.client_number = dictionary.get("client_number")
-        self.contact_details = dictionary.get("contact_details")
-        self.custom_status = dictionary.get("custom_status")
-        self.date = dictionary.get("date")
-        self.department_name = dictionary.get("department_name")
-        self.description = dictionary.get("description")
-        self.detailed_description = dictionary.get("detailed_description")
-        self.dialer_call_details = dictionary.get("dialer_call_details")
-        self.did_number = dictionary.get("did_number")
-        self.direction = dictionary.get("direction")
-        self.dtmf_input = dictionary.get("dtmf_input")
-        self.end_stamp = dictionary.get("end_stamp")
-        self.hangup_cause = dictionary.get("hangup_cause")
-        self.id = dictionary.get("id")
-        self.is_incoming_from_broadcast = dictionary.get("is_incoming_from_broadcast")
-        self.is_whatsapp = dictionary.get("is_whatsapp")
-        self.lead_id = dictionary.get("lead_id")
-        self.minutes_consumed = dictionary.get("minutes_consumed")
-        self.missed_agents = dictionary.get("missed_agents")
-        self.notes = dictionary.get("notes")
-        self.reason = dictionary.get("reason")
-        self.recording_url = dictionary.get("recording_url")
-        self.service = dictionary.get("service")
-        self.sid = dictionary.get("sid")
-        self.sip_agent_ids = dictionary.get("sip_agent_ids")
-        self.sname = dictionary.get("sname")
-        self.status = dictionary.get("status")
-        self.support_api_call = dictionary.get("support_api_call")
-        self.time = dictionary.get("time")
-        self.transfer_missed_agent = dictionary.get("transfer_missed_agent")
-        self.uuid = dictionary.get("uuid")
-        self.voicemail_recording = dictionary.get("voicemail_recording")
+    """CREATE TABLE IF NOT EXISTS calls (
+            id TEXT PRIMARY KEY NOT NULL,
+            call_id TEXT,
+            uuid TEXT,
+            description TEXT,
+            call_time TIMESTAMP,
+            call_duration INTEGER,
+            agent_number TEXT,
+            client_number TEXT,
+            recording_url TEXT,
+            did_number TEXT,
+            status TEXT
+        )"""
+    def __init__(self, query):
+        self.id = query[0]
+        self.call_id = query[1]
+        self.uuid = query[2]
+        self.description = query[3]
+        self.time = datetime.strptime(query[4], "%Y-%m-%d %H:%M:%S")
+        self.duration = query[5]
+        self.agent_number = query[6]
+        self.client_number = query[7]
+        self.recording_url = query[8]
+        self.did_number = query[9]
+        self.status = query[10]
+
+    @staticmethod
+    def from_dict(data):
+        description = data.get("description")
+        if data.get("detailed_description"):
+            description += " / "+data.get("detailed_description")
+        agent_number = data.get("agent_number")
+        if agent_number:
+            agent_number = agent_number.replace("+", "")
+        client_number = data.get("client_number")
+        if client_number:
+            client_number = client_number.replace("+", "")
+        did_number = data.get("did_number")
+        if did_number:
+            did_number = did_number.replace("+", "")
+        return Call(
+            (
+                data.get("id"),
+                data.get("call_id"),
+                data.get("uuid"),
+                description,
+                data.get("end_stamp"),
+                data.get("call_duration"),
+                agent_number,
+                client_number,
+                data.get("recording_url"),
+                did_number,
+                data.get("status"),
+            )
+        )
