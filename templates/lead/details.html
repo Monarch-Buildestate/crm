@@ -78,14 +78,20 @@
                         {% if 'comment' in event %}
                           Comment
                         {% elif 'call_id' in event %}
-                          Call
+                          Call by {{ event['agent_number'] }}
                         {% endif %}
                       </h3>
                       <div class="timeline-body">
                         {% if 'comment' in event %}
                           {{ event['comment'] }}
                         {% elif 'call_id' in event %}
-                          Call initiated
+                          {{event['status']}} | {{event['description']}} <br> Call duration: {{ event['duration'] }} seconds <br>
+                          {% if event['recording_url'] %}
+                            <audio controls>
+                              <source src="{{ event['recording_url'] }}" type="audio/mpeg">
+                              Your browser does not support the audio element.
+                            </audio>
+                          {% endif %}
                         {% else %}
                           {% if event['follow_up_time'] %}
                             {{ event['remarks'] }} <br>Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }}
