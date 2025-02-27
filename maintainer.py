@@ -59,8 +59,10 @@ while True:
         if total_records_count == records.get('count'):
             go_for_front = True
             print("No new records")
+            continue # make a request to front already without waiting anymore
     else:
         records = fetch_records(1)
+        print("FETCHING FROM FRONT")
     with conn:
         cursor = conn.cursor()
         for record in records.get("results"):
