@@ -20,7 +20,7 @@ class Call:
         self.uuid = query[2]
         self.description = query[3]
         print(query[4].replace("+05:30", ""))
-        self.time = datetime.strptime(query[4].replace("+5:30", ""), "%Y-%m-%d %H:%M:%S").replace(tzinfo=ZoneInfo("Asia/Kolkata")) + timedelta(hours=5, minutes=30) 
+        self.time = datetime.strptime(query[4].replace("+05:30", ""), "%Y-%m-%d %H:%M:%S").replace(tzinfo=ZoneInfo("Asia/Kolkata")) + timedelta(hours=5, minutes=30) 
         self.duration = query[5]
         self.agent_number = query[6]
         self.client_number = query[7]
