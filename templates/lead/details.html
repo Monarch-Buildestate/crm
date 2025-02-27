@@ -71,19 +71,21 @@
                 </div>
                 {% for event in event_list %}
                   <div>
-                    <i class="fas {% if 'comment' in event %}fa-comments bg-yellow{% else %}fa-reply bg-blue{% endif %}"></i>
+                    <i class="fas {% if 'comment' in event %}fa-comments bg-yellow{% elif 'call_id' in event %}fa-phone bg-green{% else %}fa-reply bg-blue{% endif %}"></i>
                     <div class="timeline-item">
-                      <span class="time"><i class="fas fa-clock"></i> {{ event['created_at'].strftime('%H:%M:%S') }}</span>
+                      <span class="time"><i class="fas fa-clock"></i> {{ event['created_at'] }}</span>
                       <h3 class="timeline-header">
                         {% if 'comment' in event %}
                           Comment
-                        {% else %}
-                          Follow-Up
+                        {% elif 'call_id' in event %}
+                          Call
                         {% endif %}
                       </h3>
                       <div class="timeline-body">
                         {% if 'comment' in event %}
                           {{ event['comment'] }}
+                        {% elif 'call_id' in event %}
+                          Call initiated
                         {% else %}
                           {% if event['follow_up_time'] %}
                             {{ event['remarks'] }} <br>Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }}

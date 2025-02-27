@@ -1,7 +1,10 @@
 import sqlite3
 from .Comment import Comment
 from .FollowUp import FollowUp
+from .Call import Call
 import os
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 try:
     os.chdir("/var/www/crm")
@@ -22,8 +25,13 @@ class Lead:
         with conn:
             self.comments = self.get_comments(conn)
             self.follow_ups = self.get_follow_ups(conn)
-        self.events = sorted(self.comments + self.follow_ups, key=lambda x: x.time)
-        self.created_at = query[6]
+            self.calls = self.get_calls(conn)
+        self.events = sorted(self.comments + self.follow_ups + self.calls, key=lambda x: x.time)
+        self.created_at = datetime.strptime(query[6], "%Y-%m-%d %H:%M:%S").replace(
+            tzinfo=ZoneInfo("Asia/Kolkata")
+        ) + timedelta(
+            hours=5, minutes=30
+        )  # UTC+5:30
 
     def get_comments(self, conn: sqlite3.Connection):
         with conn:
@@ -45,6 +53,16 @@ class Lead:
                 fus.append(FollowUp(fu))
         return fus
 
+    def get_calls(self, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM calls WHERE client_number=?", (self.phone_number,))
+            calls = cur.fetchall()
+            cs = []
+            for c in calls:
+                cs.append(Call(c))
+        return cs
+    
     @staticmethod
     def get(lead_id, conn: sqlite3.Connection):
         with conn:
@@ -66,5 +84,6 @@ class Lead:
             "address": self.address,
             "comments": [c.json() for c in self.comments],
             "follow_ups": [fu.json() for fu in self.follow_ups],
+            "calls": [c.json() for c in self.calls],
             "created_at": self.created_at,
         }

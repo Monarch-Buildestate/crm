@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 class Call:
     """CREATE TABLE IF NOT EXISTS calls (
             id TEXT PRIMARY KEY NOT NULL,
@@ -18,14 +19,15 @@ class Call:
         self.call_id = query[1]
         self.uuid = query[2]
         self.description = query[3]
-        self.time = datetime.strptime(query[4], "%Y-%m-%d %H:%M:%S")
+        self.time = datetime.strptime(query[4], "%Y-%m-%d %H:%M:%S").replace(tzinfo=ZoneInfo("Asia/Kolkata")) + timedelta(hours=5, minutes=30) 
         self.duration = query[5]
         self.agent_number = query[6]
         self.client_number = query[7]
         self.recording_url = query[8]
         self.did_number = query[9]
         self.status = query[10]
-
+        self.created_at = self.time
+        
     @staticmethod
     def from_dict(data):
         description = data.get("description")
@@ -55,3 +57,19 @@ class Call:
                 data.get("status"),
             )
         )
+    
+    def json(self):
+        return {
+            "id": self.id,
+            "call_id": self.call_id,
+            "uuid": self.uuid,
+            "description": self.description,
+            "time": self.time.strftime("%Y-%m-%d %H:%M:%S"),
+            "duration": self.duration,
+            "agent_number": self.agent_number,
+            "client_number": self.client_number,
+            "recording_url": self.recording_url,
+            "did_number": self.did_number,
+            "status": self.status,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }
