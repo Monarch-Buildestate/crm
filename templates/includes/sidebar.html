@@ -37,38 +37,14 @@
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <a href="/layout-top-nav-sidebar.html" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
                   <p>Top Navigation + Sidebar</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="/layout-boxed.html" class="nav-link {% if 'layout-boxed' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
                   <p>Boxed</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/layout-fixed-sidebar.html" class="nav-link {% if 'layout-fixed-sidebar' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Fixed Sidebar</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/layout-fixed-topnav.html" class="nav-link {% if 'layout-fixed-topnav' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Fixed Navbar</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/layout-fixed-footer.html" class="nav-link {% if 'layout-fixed-footer' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Fixed Footer</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/layout-collapsed-sidebar.html" class="nav-link {% if 'layout-collapsed' in segment %} active {% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Collapsed Sidebar</p>
                 </a>
               </li>
             </ul>
@@ -84,32 +60,59 @@
             </a>
           </li>
           </li>-->
-          <li class="nav-item">
-            <a href="/" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Dashboard
-                <span class="badge badge-info right"></span>
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="/calls" class="nav-link">
+          <li class="nav-item has-treeview {% if 'layout' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link {% if 'layout' in segment %} active {% endif %}">
               <i class="nav-icon fa fa-phone"></i>
               <p>
                 Calls
+                <i class="fas fa-angle-left right"></i>
                 <span class="badge badge-info right"></span>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/calls" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <p>All Calls</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/call/active" class="nav-link {% if 'layout-boxed' in segment %} active {% endif %}">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <p>Active Call</p>
+                </a>
+              </li>
+            </ul>
           </li>
-          <li class="nav-item">
-            <a href="/lead" class="nav-link">
+          <li class="nav-item has-treeview {% if 'layout' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link {% if 'layout' in segment %} active {% endif %}">
               <i class="nav-icon fa fa-users"></i>
               <p>
                 Leads
+                <i class="fas fa-angle-left right"></i>
                 <span class="badge badge-info right"></span>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/lead" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <p>All Leads</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/lead/create" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <p>Create Lead</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/lead/pending" class="nav-link {% if 'layout-boxed' in segment %} active {% endif %}">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <p>Pending Action</p>
+                </a>
+              </li>
+            </ul>
           </li>
       </nav>
       <!-- /.sidebar-menu -->

@@ -34,6 +34,9 @@ try:
     with open("config.json", "r") as f:
         config = json.load(f)
     tatatelekey = config.get("tata_tele_api_key", None)
+    did_number = config.get("did_number", None)
+    if did_number:
+        did_number = did_number.replace("+", "")
 except FileNotFoundError:
     config = {}
     with open("config.json", "w+") as f:
@@ -271,9 +274,15 @@ def create_lead():
 
 def get_call_details(agent_number=None):
     with conn:
-        cur.execute("SELECT * FROM calls WHERE agent_number=?", (agent_number,))
+        cur = conn.cursor()
+        if agent_number is None:
+            cur.execute("SELECT * FROM calls WHERE did_number=? ORDER BY call_time", (did_number,))
+        else:
+            cur.execute("SELECT * FROM calls WHERE agent_number=? AND did_number=? ORDER BY call_time", (agent_number,did_number,))
         calls = cur.fetchall()
         calls = [Call(call) for call in calls]
+        # sort by call time
+    return calls
 
 
 def get_active_calls(): 

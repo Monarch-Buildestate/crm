@@ -54,20 +54,20 @@
                 <table id="calldetails" class="table table-bordered table-striped">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>Time</th>
                       <th>From</th>
                       <th>To</th>
-                      <th>Time</th>
+                      <th>ID</th>
                       <th>Description</th>
                       <th>Recording</th>
                     </tr>
                   </thead>
                   {% for call in calls %}
                     <tr>
-                        <td>{{ call.call_id }}</td>
+                        <td>{{ call.time }} IST</td>
                         <td>{{ call.agent_number }}</td>
                         <td>{{ call.client_number}}</td>
-                        <td>{{ call.end_stamp }} IST</td>
+                        <td>{{ call.call_id }}</td>
                         <td>{{call.description}}</td>
                         {% if call.recording_url %}
                           <td><audio controls><source src={{call.recording_url}} type="audio/ogg"></audio></td>
@@ -113,6 +113,7 @@
   <script>
     $(function () {
       $("#calldetails").DataTable({
+        "order": [[ 0, "desc" ]],
         "responsive": true,
         "autoWidth": true,
       });
