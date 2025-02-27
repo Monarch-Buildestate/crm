@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Active Call Data {% endblock %} 
+{% block title %} Call Data {% endblock %} 
 
 <!-- Element injected in the BODY element -->
 {% block body_class %} {% endblock body_class %} 
@@ -29,12 +29,13 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>DataTables</h1>
+            <h1>Active Calls
+            </h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Call Details</li>
+              <li class="breadcrumb-item active">Active Calls</li>
             </ol>
           </div>
         </div>
@@ -47,31 +48,40 @@
         <div class="row">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Active Call Details</h3>
+                <h3 class="card-title">Active Calls</h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
                 <table id="calldetails" class="table table-bordered table-striped">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>Time</th>
                       <th>From</th>
                       <th>To</th>
-                      <th>Time</th>
-                      <th>Recording</th>
+                      <th>ID</th>
+                      <th>Description</th>
+                      <th>Call Time</th>
+                      <th>Transfer</th>
                     </tr>
                   </thead>
-                  {% for call in calls %}
+                  {% for call in active_calls %}
                     <tr>
+                        <td>{{ call.created_at }} IST</td>
+                        <td>{{ call.source }} {{call.agent_name}} </td>
+                        <td>{{ call.destination}}</td>
                         <td>{{ call.call_id }}</td>
-                        <td>{{ call.agent_number }}</td>
-                        <td>{{ call.client_number}}</td>
-                        <td>{{ call.end_stamp }} IST</td>
-                        {% if call.recording_url %}
-                          <td><audio controls><source src={{call.recording_url}} type="audio/ogg"></audio></td>
-                        {% else %}
-                          <td>No Recording</td>
-                        {% endif %}
+                        <td>{{call.state}}</td>
+                        <td>{{call.call_time}}</td>
+                        <td>
+                          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Transfer
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                              {% for item in transfer %}
+                                  <a class="dropdown-item" href="/call/transfer/{{ call.call_id }}/{{ item.phone_number }}">{{ item.name }}</a>
+                              {% endfor %}
+                          </div>
+                      </td>                      
                       </tr>
                   {% endfor %}
                 </table>
@@ -111,6 +121,7 @@
   <script>
     $(function () {
       $("#calldetails").DataTable({
+        "order": [[ 0, "desc" ]],
         "responsive": true,
         "autoWidth": true,
       });

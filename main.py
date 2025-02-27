@@ -296,15 +296,33 @@ def get_active_calls():
     response = requests.get(url, json=payload, headers=headers, params=params)
     if response.status_code != 200:
         return []
-    with open("test2.json", "w+") as f:
-        json.dump(response.json(), f, indent=4)
-    calls = response.json()
-    return render_template("call/active.html", calls=calls)
+    active_calls = response.json()
+    return active_calls
 
 @app.route("/calls/active")
 def active_calls():
-    calls = get_active_calls()
-    return render_template("call/active.html", calls=calls)
+    calls =[{'id': 90143183, 'user_id': 45536, 'client_id': None, 'call_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'direction': 2, 'source': '+916396614787', 'type': 'click-to-call', 'did': '+918069551858', 'multiple_destination_type': 'c2c', 'multiple_destination_name': 'PJSIP/917297915965', 'destination': '+917297915965', 'state': 'Answered', 'queue_state': None, 'channel_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'created_at': '2025-02-27 11:52:09', 'sip_domain': '127.0.0.1', 'broadcast_id': None, 'broadcast_no': None, 'call_time': '00:00:19', 'agent_name': 'Monarch Admin', 'customer_number': '917297915965'}]
+    can_be_transfered_to = User.get_all(conn)
+    can_be_transfered_to = [user for user in can_be_transfered_to if user.phone_number and user.phone_number != current_user.phone_number]
+    can_be_transfered_to = [{"id": user.id, "name": user.username, "phone_number": user.phone_number} for user in can_be_transfered_to]
+    return render_template("call/active.html", active_calls=calls, transfer=can_be_transfered_to)
+
+@app.route("/calls/transfer/<call_id>/<new_number>", methods=["POST"])
+def transfer_call(call_id, new_number):
+    call_id = request.args.get("call_id")
+    url = "https://api-smartflo.tatateleservices.com/v1/call/options"
+    payload = {
+        "type": 4,
+        "call_id": call_id,
+        "intercom": new_number
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "Authorization": tatatelekey,
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    return redirect(url_for("active_calls"))
 
 
 @app.route("/calls")
