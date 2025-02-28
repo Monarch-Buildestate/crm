@@ -113,7 +113,7 @@ class Lead:
         return None
     
     @staticmethod
-    def create(name=None, phone_number=None, email=None, address=None, user_id=None, conn: sqlite3.Connection = None):
+    def create(name=None, phone_number=None, email=None, address=None, user_id=0, conn: sqlite3.Connection = None):
         with conn:
             cur = conn.cursor()
             cur.execute(
