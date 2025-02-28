@@ -381,7 +381,7 @@ def call_missed():
     # last 12 digits
     lead = Lead.get_by_phone_number(caller_id_number, conn)
     if not lead:
-        lead = Lead.create(name="Missed Call", phone_number=caller_id_number, conn=conn, user_id=0)
+        lead = Lead.create(name="Missed Call", phone_number=caller_id_number, conn=conn, user_id=1)
     else:
         return "Lead already exists"
     return f"Created lead for {lead.phone_number}"
