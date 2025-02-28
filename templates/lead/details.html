@@ -79,7 +79,10 @@
                           Comment
                         {% elif 'call_id' in event %}
                           Call by {{ event['agent_number'] }}
+                        {%else%}
+                          Follow-Up
                         {% endif %}
+
                       </h3>
                       <div class="timeline-body">
                         {% if 'comment' in event %}
