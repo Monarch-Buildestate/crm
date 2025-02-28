@@ -372,6 +372,21 @@ def call_answered():
     return f"Assigned {agent.username} to {lead.phone_number}"
 
 
+@app.route("/api/webhook/event/call_missed")
+def call_missed():
+    caller_id_number = request.args.get("caller_id_number", None)
+    if not caller_id_number:
+        return "Invalid data"
+    # get user of that agent
+    # last 12 digits
+    lead = Lead.get_by_phone_number(caller_id_number, conn)
+    if not lead:
+        lead = Lead.create(name="Missed Call", phone_number=caller_id_number, conn=conn)
+    else:
+        return "Lead already exists"
+    return f"Created lead for {lead.phone_number}"
+
+
 @app.route("/api/initiate_call", methods=["POST"])
 def initiate_call():
     if not tatatelekey:
