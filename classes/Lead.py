@@ -73,7 +73,60 @@ class Lead:
                 return None
             return Lead(lead)
         return None
+    
+    @staticmethod
+    def get_by_phone_number(phone_number, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            # like 
+            cur.execute("SELECT * FROM lead WHERE phone_number LIKE ?", (f"%{phone_number}%",))
+            lead = cur.fetchone()
+            if not lead:
+                return None
+            return Lead(lead)
+        return None
+    
+    @staticmethod
+    def get_by_email(email, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM lead WHERE email LIKE ?", (f"%{email}%",))
+            lead = cur.fetchone()
+            if not lead:
+                return None
+            return Lead(lead)
+        return None
+    
+    @staticmethod
+    def get_by_name(name, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM lead WHERE name LIKE ?", (f"%{name}%",))
+            lead = cur.fetchone()
+            if not lead:
+                return None
+            return Lead(lead)
+        return None
+    
+    @staticmethod
+    def create(name=None, phone_number=None, email=None, address=None, user_id=None, conn: sqlite3.Connection = None):
+        with conn:
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO lead (name, phone_number, email, address, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (name, phone_number, email, address, user_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+            )
+            conn.commit()
+            return Lead.get(cur.lastrowid, conn)
+        return None
 
+    def assign(self, user_id, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("UPDATE lead SET user_id=? WHERE id=?", (user_id, self.id))
+            conn.commit()
+            return True
+        return False
     def json(self):
         return {
             "id": self.id,
