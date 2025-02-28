@@ -149,3 +149,18 @@ class Lead:
             conn.commit()
             return True
         return False
+    
+    @staticmethod
+    def get_all(admin=False, user_id=None, conn: sqlite3.Connection = None):
+        print(admin)
+        with conn:
+            cur = conn.cursor()
+            if admin:
+                cur.execute("SELECT * FROM lead")
+            else:
+                cur.execute("SELECT * FROM lead WHERE user_id=?", (user_id,))
+            leads = cur.fetchall()
+            ls = []
+            for l in leads:
+                ls.append(Lead(l))
+        return ls

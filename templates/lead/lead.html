@@ -60,6 +60,7 @@
                       <th>Phone</th>
                       <th>Created At</th>
                       <th>Updated At</th>
+                      <th>Assigned To</th>
                     </tr>
                   </thead>
                   {% for lead in leads %}
@@ -70,6 +71,7 @@
                         <td>{{ lead.phone_number }}</td>
                         <td>{{ lead.created_at }}</td>
                         <td>{{ lead.updated_at }}</td>
+                        <td>{{ lead.assigned_to }}</td>
                     </tr>
                   {% endfor %}
                 </table>

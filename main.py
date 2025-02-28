@@ -181,6 +181,16 @@ def create_timeline(lead: Lead):
         timeline[event.created_at.date()].append(event.json())
     return timeline
 
+@app.route("/lead/<lead_id>/assign", methods=["POST"])
+@login_required
+def assign_lead(lead_id):
+    print(request.form)
+    new_user_id = request.form.get("new_assignee")
+    if not new_user_id:
+        return redirect(url_for("lead", lead_id=lead_id))
+    lead = Lead.get(lead_id, conn)
+    lead.assign(new_user_id, conn)
+    return redirect(url_for("lead", lead_id=lead_id))
 
 @app.route("/lead/<lead_id>", methods=["POST", "GET"])
 @app.route("/lead")
@@ -200,13 +210,24 @@ def lead(lead_id: int = None):
 
     if not lead_id:
         leads = current_user.get_leads(conn)
+        for lead in leads:
+            lead.assigned_to = User.get(lead.user_id, conn).username
         return render_template("lead/lead.html", leads=leads)
     else:
         lead = Lead.get(lead_id, conn)
+        if not lead:
+            return redirect(url_for("lead"))
+        if not current_user.admin and lead.user_id != current_user.id:
+            # don't allow access to other user's leads if not admin
+            return redirect(url_for("lead"))
+        lead_assigned_to = User.get(lead.user_id, conn)
+        lead.assigned_to = lead_assigned_to.username
+        users = User.get_all(conn)
         return render_template(
             "lead/details.html",
             lead=lead,
             events=create_timeline(lead),
+            users= users,
             current_time=datetime.now().strftime("%Y-%m-%dT%H:%M"),
         )
 

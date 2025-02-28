@@ -111,6 +111,16 @@
           </div>
           <div class="lead-details">
             <h3>Lead Details ({{lead.id}})</h3>
+            <h2>Lead Assigned To: {{lead.assigned_to}}</h2>
+            <form action="/lead/{{ lead.id }}/assign" method="POST">
+              <label>Assign To</label>
+              <select class="form-control" name="new_assignee">
+                {% for user in users %}
+                  <option name="user_id" value="{{ user.id }}">{{ user.name }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-primary mt-2">Assign</button>
+
             <form action="/lead/{{ lead.id }}" method="POST">
               <div class="form-group">
                 <label>Name</label>

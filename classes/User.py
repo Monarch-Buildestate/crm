@@ -33,14 +33,7 @@ class User(UserMixin):
         return None
 
     def get_leads(self, conn: sqlite3.Connection):
-        with conn:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM lead WHERE user_id=?", (self.id,))
-            leads = cur.fetchall()
-            ls = []
-            for l in leads:
-                ls.append(Lead(l))
-        return ls
+        return Lead.get_all(self.admin, self.id, conn)
     
     @staticmethod
     def get_by_phone_number(phone_number, conn:sqlite3.Connection):
