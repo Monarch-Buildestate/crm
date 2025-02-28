@@ -27,6 +27,13 @@ class Call:
         self.did_number = query[9]
         self.status = query[10]
         self.created_at = self.time
+    
+    @staticmethod 
+    def get_all(conn):
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM calls")
+            return [Call(row) for row in cursor.fetchall()]
         
     @staticmethod
     def from_dict(data):

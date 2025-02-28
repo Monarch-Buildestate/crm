@@ -169,7 +169,37 @@ def logout():
 def slash():
     if not current_user.is_authenticated:
         return redirect(url_for("login"))
-    return render_template("home/index.html")
+    # create some hopelessly trying to look good graphics
+    all_leads = Lead.get_all(admin=True, conn=conn)
+    leads_to_address_today = 0
+    leads_created_today = 0
+    leads_addressed_today = 0
+    for lead in all_leads:
+        if lead.created_at.date() == datetime.now().date():
+            leads_created_today += 1
+        if lead.follow_ups:
+            if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
+                leads_to_address_today += 1
+        else:
+            leads_to_address_today += 1 # if no follow up then add to today's list
+        for fu in lead.follow_ups:
+            if fu.created_at.date() == datetime.now().date():
+                leads_addressed_today += 1
+    calls = Call.get_all(conn)
+    calls_today = []
+    for call in calls:
+        if call.time.date() == datetime.now().date():
+            calls_today.append(call)
+        else:
+            break # since calls are sorted by time, we can break here
+    calls_made_today = len(calls_today)
+    return render_template(
+        "home/index.html",
+        leads_to_address_today=leads_to_address_today,
+        leads_created_today=leads_created_today,
+        leads_addressed_today=leads_addressed_today,
+        calls_made_today=calls_made_today,
+    )
 
 
 def create_timeline(lead: Lead):
