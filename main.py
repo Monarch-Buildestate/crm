@@ -418,15 +418,11 @@ def call_missed():
 
 @app.route("/facebook/lead/add")
 def add_facebook_lead():
-    print(request.form)
-    print(request.get_json())
-    print(request.get_data())
-    print(request.get_data(as_text=True))
-    print(request.headers)
-    return request.form
-    data = request.get_json()
-    name = data.get("FULL_NAME")
-    phone_number = data.get("PHONE")
+    name = request.args.get("FULL_NAME")
+    phone_number = request.args.get("PHONE")
+    if Lead.get_by_phone_number(phone_number, conn):
+        return "Lead already exists"
+    
     Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn)
     return "Lead added"
 
