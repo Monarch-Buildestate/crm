@@ -77,10 +77,16 @@
                       <h3 class="timeline-header">
                         {% if 'comment' in event %}
                           Comment
+                          {%if current_user.admin %}
+                            <a href="/lead/{{ lead.id }}/comment/{{ event['id'] }}/delete" class="btn btn-danger">Delete</a>
+                          {% endif %}
                         {% elif 'call_id' in event %}
                           Call by {{ event['agent_number'] }}
                         {%else%}
                           Follow-Up
+                          {%if current_user.admin %}
+                            <a href="/lead/{{ lead.id }}/followup/{{ event['id'] }}/delete" class="btn btn-danger">Delete</a>
+                          {% endif %}
                         {% endif %}
 
                       </h3>
@@ -141,6 +147,9 @@
               <button class="btn btn-success">Save</button>
             </form>
             <button class="btn btn-primary" onclick="call()">📞</button>
+            {% if current_user.admin %}
+              <a href="/lead/{{ lead.id }}/delete" class="btn btn-danger">Delete</a>
+            {% endif %}
             <div class="follow-up-form">
               <h4>Add a Follow-Up</h4>
               <form action="/lead/{{ lead.id }}/followup" method="POST">

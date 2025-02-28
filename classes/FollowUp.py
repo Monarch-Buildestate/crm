@@ -33,6 +33,21 @@ class FollowUp:
             "created_at": self.created_at,
         }
 
+    def delete(self, conn):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM follow_ups WHERE id = ?", (self.id,))
+            conn.commit()
+            return True
+    
+    @staticmethod
+    def get(follow_up_id, conn):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM follow_ups WHERE id=?", (follow_up_id,))
+            follow_up = cur.fetchone()
+            return FollowUp(follow_up)
+        
     @staticmethod
     def create(userid, lead_id, follow_up_time, follow_up_user_id, remarks, conn):
         with conn:

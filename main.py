@@ -264,6 +264,15 @@ def lead(lead_id: int = None):
         current_time=datetime.now().strftime("%Y-%m-%dT%H:%M"),
     )
 
+@app.route("/lead/<lead_id>/delete")
+@login_required
+def delete_lead(lead_id):
+    if not current_user.admin:
+        return redirect(url_for("lead", lead_id=lead_id))
+    lead = Lead.get(lead_id, conn)
+    lead.delete(conn)
+    return redirect(url_for("leads"))
+
 @app.route("/lead/pending")
 @login_required
 def pending_leads():
@@ -286,6 +295,14 @@ def comment(lead_id):
     Comment.create(comment, current_user.id, lead_id, conn)
     return redirect(url_for("lead", lead_id=lead_id))
 
+@app.route("/lead/<lead_id>/comment/<comment_id>/delete")
+@login_required
+def delete_comment(lead_id, comment_id):
+    if not current_user.admin:
+        return redirect(url_for("lead", lead_id=lead_id))
+    comment = Comment.get(comment_id, conn)
+    comment.delete(conn)
+    return redirect(url_for("lead", lead_id=lead_id))
 
 @app.route("/lead/<lead_id>/followup", methods=["POST"])
 @login_required
@@ -300,6 +317,15 @@ def followup(lead_id):
     FollowUp.create(
         current_user.id, lead_id, follow_up_time, follow_up_user_id, remarks, conn
     )
+    return redirect(url_for("lead", lead_id=lead_id))
+
+@app.route("/lead/<lead_id>/followup/<followup_id>/delete")
+@login_required
+def delete_followup(lead_id, followup_id):
+    if not current_user.admin:
+        return redirect(url_for("lead", lead_id=lead_id))
+    followup = FollowUp.get(followup_id, conn)
+    followup.delete(conn)
     return redirect(url_for("lead", lead_id=lead_id))
 
 

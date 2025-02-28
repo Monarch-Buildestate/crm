@@ -67,6 +67,20 @@ class Lead:
                 cs.append(Call(c))
         return cs
     
+    def delete(self, conn: sqlite3.Connection):
+        # delete all comments, follow_ups
+        for c in self.comments:
+            c.delete(conn)
+        for fu in self.follow_ups:
+            fu.delete(conn)
+        # never delete calls
+        with conn:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM lead WHERE id=?", (self.id,))
+            conn.commit()
+            return True
+        return False
+    
     @staticmethod
     def get(lead_id, conn: sqlite3.Connection):
         with conn:

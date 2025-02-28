@@ -23,6 +23,21 @@ class Comment:
             "created_at": self.created_at,
         }
     
+    def delete(self, conn):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM comments WHERE id = ?", (self.id,))
+            conn.commit()
+            return True
+    
+    @staticmethod 
+    def get(comment_id, conn):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM comments WHERE id=?", (comment_id,))
+            comment = cur.fetchone()
+            return Comment(comment)
+        
     @staticmethod
     def create(comment, user_id, lead_id, conn):
         with conn:
