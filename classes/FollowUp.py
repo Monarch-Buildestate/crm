@@ -34,3 +34,13 @@ class FollowUp:
             "remarks": self.remarks,
             "created_at": self.created_at,
         }
+
+    @staticmethod
+    def create(userid, lead_id, follow_up_time, follow_up_user_id, remarks, conn):
+        with conn:
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO follow_ups (user_id, lead_id, follow_up_time, follow_up_user_id, remarks) VALUES (?,?,?,?,?)",
+                (userid, lead_id, follow_up_time, follow_up_user_id, remarks),
+            )
+            conn.commit()

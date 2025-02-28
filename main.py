@@ -194,13 +194,8 @@ def lead(lead_id: int = None):
             new_phone_number = "91" + new_phone_number"""  # phone number is not editable
         new_email = request.form["email"]
         new_address = request.form["address"]
-        with conn:
-            cur = conn.cursor()
-            cur.execute(
-                "UPDATE lead SET name=?, email=?, address=? WHERE id=?",
-                (new_name, new_email, new_address, lead_id),
-            )
-            conn.commit()
+        lead = Lead.get(lead_id, conn)
+        lead.update(new_name, new_email, new_address, conn)
         return redirect(url_for("lead", lead_id=lead_id))
 
     if not lead_id:
@@ -220,13 +215,7 @@ def lead(lead_id: int = None):
 @login_required
 def comment(lead_id):
     comment = request.form["comment"]
-    with conn:
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO comments (user_id, lead_id, comment) VALUES (?,?,?)",
-            (current_user.id, lead_id, comment),
-        )
-        conn.commit()
+    Comment.create(comment, current_user.id, lead_id, conn)
     return redirect(url_for("lead", lead_id=lead_id))
 
 
@@ -240,13 +229,9 @@ def followup(lead_id):
     if not follow_up_user_id:
         follow_up_user_id = current_user.id
     remarks = request.form["remarks"]
-    with conn:
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO follow_ups (user_id, lead_id, follow_up_time, follow_up_user_id, remarks) VALUES (?,?,?,?,?)",
-            (current_user.id, lead_id, follow_up_time, follow_up_user_id, remarks),
-        )
-        conn.commit()
+    FollowUp.create(
+        current_user.id, lead_id, follow_up_time, follow_up_user_id, remarks, conn
+    )
     return redirect(url_for("lead", lead_id=lead_id))
 
 
@@ -261,13 +246,7 @@ def create_lead():
 
         email = request.form["email"]
         address = request.form["city"]
-        with conn:
-            cur = conn.cursor()
-            cur.execute(
-                "INSERT INTO lead (user_id, name, phone_number, email, address) VALUES (?,?,?,?,?)",
-                (current_user.id, name, phone_number, email, address),
-            )
-            conn.commit()
+        Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, conn=conn)
         return redirect(url_for("lead"))
     return render_template("lead/create.html")
 
@@ -334,6 +313,22 @@ def calls():
         calls = get_call_details(current_user.phone_number)
     return render_template("call/calls.html", calls=calls)
 
+@app.route("/api/webhook/event/call_answered")
+def call_answered():
+    caller_id_number = request.args.get("caller_id_number")
+    answered_agent_number = request.args.get("answered_agent_number")
+    # get user of that agent
+    # last 12 digits
+    agent = User.get_by_phone_number(answered_agent_number[-12:], conn)
+    if not agent:
+        return "Agent not found"
+    answered_agent_number = answered_agent_number[-12:]
+    lead = Lead.get_by_phone_number(caller_id_number, conn)
+    if not lead:
+        lead = Lead.create(name="Incoming Call", phone_number=caller_id_number, conn=conn)
+    lead.assign(agent.id, conn)
+    return f"Assigned {agent.username} to {lead.phone_number}"
+
 
 @app.route("/api/initiate_call", methods=["POST"])
 def initiate_call():
@@ -366,12 +361,9 @@ def initiate_call():
 def dialplan():
     caller_id = request.args.get("caller_id_number")
     with conn:
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM lead WHERE phone_number=?", (caller_id,))
-        lead = cur.fetchone()
+        lead = Lead.get_by_phone_number(caller_id, conn)
         if not lead:
             return "Failover"
-        lead = Lead(lead)
         return [{"transfer": {"type": "number", "data": [lead.agent.phone_number]}}]
 
 

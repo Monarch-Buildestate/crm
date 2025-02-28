@@ -140,3 +140,14 @@ class Lead:
             "calls": [c.json() for c in self.calls],
             "created_at": self.created_at,
         }
+
+    def update_details(self, name=None, phone_number=None, email=None, address=None, conn: sqlite3.Connection = None):
+        with conn:
+            cur = conn.cursor()
+            cur.execute(
+                "UPDATE lead SET name=?, phone_number=?, email=?, address=? WHERE id=?",
+                (name, phone_number, email, address, self.id),
+            )
+            conn.commit()
+            return True
+        return False

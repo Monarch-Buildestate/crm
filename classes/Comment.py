@@ -24,3 +24,14 @@ class Comment:
             "comment": self.comment,
             "created_at": self.created_at,
         }
+    
+    @staticmethod
+    def create(comment, user_id, lead_id, conn):
+        with conn:
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO comments (user_id, lead_id, comment, created_at) VALUES (?, ?, ?)",
+                (user_id, lead_id, comment,),
+            )
+            conn.commit()
+            return Comment(cur.lastrowid)
