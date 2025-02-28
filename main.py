@@ -192,8 +192,16 @@ def assign_lead(lead_id):
     lead.assign(new_user_id, conn)
     return redirect(url_for("lead", lead_id=lead_id))
 
-@app.route("/lead/<lead_id>", methods=["POST", "GET"])
+
 @app.route("/lead")
+@login_required
+def leads():
+    leads = current_user.get_leads(conn)
+    for lead in leads:
+        lead.assigned_to = User.get(lead.user_id, conn).username
+    return render_template("lead/lead.html", leads=leads)
+
+@app.route("/lead/<lead_id>", methods=["POST", "GET"])
 @login_required
 def lead(lead_id: int = None):
     if request.method == "POST":
@@ -207,30 +215,38 @@ def lead(lead_id: int = None):
         lead = Lead.get(lead_id, conn)
         lead.update(new_name, new_email, new_address, conn)
         return redirect(url_for("lead", lead_id=lead_id))
+    
+    lead = Lead.get(lead_id, conn)
+    if not lead:
+        return redirect(url_for("lead"))
+    if not current_user.admin and lead.user_id != current_user.id:
+        # don't allow access to other user's leads if not admin
+        return redirect(url_for("lead"))
+    lead_assigned_to = User.get(lead.user_id, conn)
+    lead.assigned_to = lead_assigned_to.username
+    users = User.get_all(conn)
+    return render_template(
+        "lead/details.html",
+        lead=lead,
+        events=create_timeline(lead),
+        users= users,
+        current_time=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+    )
 
-    if not lead_id:
-        leads = current_user.get_leads(conn)
-        for lead in leads:
-            lead.assigned_to = User.get(lead.user_id, conn).username
-        return render_template("lead/lead.html", leads=leads)
-    else:
-        lead = Lead.get(lead_id, conn)
-        if not lead:
-            return redirect(url_for("lead"))
-        if not current_user.admin and lead.user_id != current_user.id:
-            # don't allow access to other user's leads if not admin
-            return redirect(url_for("lead"))
-        lead_assigned_to = User.get(lead.user_id, conn)
-        lead.assigned_to = lead_assigned_to.username
-        users = User.get_all(conn)
-        return render_template(
-            "lead/details.html",
-            lead=lead,
-            events=create_timeline(lead),
-            users= users,
-            current_time=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-        )
-
+@app.route("/lead/pending")
+@login_required
+def pending_leads():
+    leads = current_user.get_leads(conn)
+    for lead in leads:
+        lead.assigned_to = User.get(lead.user_id, conn).username
+    pending = []
+    for lead in leads:
+        if not lead.follow_ups:
+            pending.append(lead)
+            continue
+        if lead.follow_ups[-1].follow_up_time < datetime.now(): # if time is gone then add to pending
+            pending.append(lead)
+    return render_template("lead/lead.html", leads=pending)
 
 @app.route("/lead/<lead_id>/comment", methods=["POST"])
 @login_required
@@ -268,7 +284,7 @@ def create_lead():
         email = request.form["email"]
         address = request.form["city"]
         Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, conn=conn)
-        return redirect(url_for("lead"))
+        return redirect(url_for("leads"))
     return render_template("lead/create.html")
 
 

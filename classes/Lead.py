@@ -30,6 +30,12 @@ class Lead:
         self.created_at = datetime.strptime(query[6], "%Y-%m-%d %H:%M:%S") + timedelta(
             hours=5, minutes=30
         )  # UTC+5:30
+        if self.follow_ups:
+            self.last_follow_up_time = self.follow_ups[-1].created_at
+            self.next_follow_up_time = self.follow_ups[-1].follow_up_time
+        else:
+            self.last_follow_up_time = None
+            self.next_follow_up_time = None
 
     def get_comments(self, conn: sqlite3.Connection):
         with conn:
