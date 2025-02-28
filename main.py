@@ -416,6 +416,13 @@ def call_missed():
         return "Lead already exists"
     return f"Created lead for {lead.phone_number}"
 
+@app.route("/facebook/lead/add", methods=["POST"])
+def add_facebook_lead():
+    data = request.get_json()
+    name = data.get("FULL_NAME")
+    phone_number = data.get("PHONE")
+    Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn)
+    return "Lead added"
 
 @app.route("/api/initiate_call", methods=["POST"])
 def initiate_call():
