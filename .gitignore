@@ -3,3 +3,4 @@ classes/__pycache__/*
 config.json
 test.py
 database.db
+test*
