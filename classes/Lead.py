@@ -60,7 +60,7 @@ class Lead:
     def get_calls(self, conn: sqlite3.Connection):
         with conn:
             cur = conn.cursor()
-            cur.execute("SELECT * FROM calls WHERE client_number=?", (self.phone_number,))
+            cur.execute("SELECT * FROM calls WHERE client_number LIKE ?", (f"%{self.phone_number}%",))
             calls = cur.fetchall()
             cs = []
             for c in calls:
