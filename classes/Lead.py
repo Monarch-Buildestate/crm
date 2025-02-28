@@ -20,8 +20,8 @@ class Lead:
         self.user_id = query[1]
         self.name = query[2]
         self.phone_number = query[3]
-        self.email = query[4]
-        self.address = query[5]
+        self.email = '' if query[4] == "None" else query[4]
+        self.address = '' if query[5] == "None" else query[5]
         with conn:
             self.comments = self.get_comments(conn)
             self.follow_ups = self.get_follow_ups(conn)
