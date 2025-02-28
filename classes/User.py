@@ -41,6 +41,16 @@ class User(UserMixin):
             for l in leads:
                 ls.append(Lead(l))
         return ls
+    
+    @staticmethod
+    def get_by_phone_number(phone_number, conn:sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM users WHERE phone_number LIKE ?", (f"%{phone_number}%",))
+            user = cur.fetchone()
+            if not user:
+                return None
+        return User(*user)
 
     @staticmethod
     def get_all(conn: sqlite3.Connection):
