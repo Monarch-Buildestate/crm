@@ -9,9 +9,7 @@ class Comment:
         self.lead_id = query[2]
         self.comment = query[3]
         # 2025-02-25 22:42:06
-        self.created_at = datetime.strptime(query[4], "%Y-%m-%d %H:%M:%S").replace(
-            tzinfo=ZoneInfo("Asia/Kolkata")
-        ) + timedelta(
+        self.created_at = datetime.strptime(query[4], "%Y-%m-%d %H:%M:%S") + timedelta(
             hours=5, minutes=30
         )  # UTC+5:30
         self.time = self.created_at
@@ -30,8 +28,8 @@ class Comment:
         with conn:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO comments (user_id, lead_id, comment, created_at) VALUES (?, ?, ?)",
+                "INSERT INTO comments (user_id, lead_id, comment) VALUES (?, ?, ?)",
                 (user_id, lead_id, comment,),
             )
             conn.commit()
-            return Comment(cur.lastrowid)
+            return True

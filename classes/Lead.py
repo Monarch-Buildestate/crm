@@ -27,9 +27,7 @@ class Lead:
             self.follow_ups = self.get_follow_ups(conn)
             self.calls = self.get_calls(conn)
         self.events = sorted(self.comments + self.follow_ups + self.calls, key=lambda x: x.time)
-        self.created_at = datetime.strptime(query[6], "%Y-%m-%d %H:%M:%S").replace(
-            tzinfo=ZoneInfo("Asia/Kolkata")
-        ) + timedelta(
+        self.created_at = datetime.strptime(query[6], "%Y-%m-%d %H:%M:%S") + timedelta(
             hours=5, minutes=30
         )  # UTC+5:30
 
