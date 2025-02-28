@@ -315,8 +315,12 @@ def calls():
 
 @app.route("/api/webhook/event/call_answered")
 def call_answered():
-    caller_id_number = request.args.get("caller_id_number")
-    answered_agent_number = request.args.get("answered_agent_number")
+    caller_id_number = request.args.get("caller_id_number", None)
+    if not caller_id_number:
+        return "Invalid data"
+    answered_agent_number = request.args.get("answered_agent_number", None)
+    if not answered_agent_number:
+        return "Invalid data"
     # get user of that agent
     # last 12 digits
     agent = User.get_by_phone_number(answered_agent_number[-12:], conn)
