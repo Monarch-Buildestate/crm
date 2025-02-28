@@ -149,7 +149,8 @@ def login():
         next = request.args.get('next', "")
         if next:
             next = f"?next={next}"
-        return render_template("accounts/login.html", next=next)
+        message = f"Please login to continue ({len(User.get_all(conn))} users)"
+        return render_template("accounts/login.html", next=next, msg=message)
 
 
 @login_manager.user_loader
