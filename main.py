@@ -418,6 +418,7 @@ def call_missed():
 
 @app.route("/facebook/lead/add")
 def add_facebook_lead():
+    print(request.form)
     return request.form
     data = request.get_json()
     name = data.get("FULL_NAME")
