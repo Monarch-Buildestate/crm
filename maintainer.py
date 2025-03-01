@@ -56,7 +56,7 @@ while True:
         
         # if each page have 20 records. we will be requesting page number total_records/20 + 1 
         records = fetch_records(page_count)
-        if total_records_count == records.get('count'):
+        if total_records_count >= records.get('count'):
             go_for_front = True
             print("No new records")
             continue # make a request to front already without waiting anymore
