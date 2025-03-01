@@ -39,12 +39,12 @@ def fetch_records(page=1):
     else:
         return response.json()
 
-go_for_front = False
-interval = 120
-page_count = 0
+
 
 def main():
-
+    go_for_front = False
+    interval = 120
+    page_count = 0
     while True:
         # get oldest record  and length of records
         page_count += 1 
