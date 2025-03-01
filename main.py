@@ -542,9 +542,10 @@ def initiate_call():
 
 @app.route("/api/dialplan", methods=["POST"])
 def dialplan():
-    caller_id = request.args.get("caller_id_number")
+    caller_id = request.args.get("caller_id_number").strip()
     if "+" in caller_id:
         caller_id = caller_id.replace("+", "")
+    print(caller_id)
     if len(caller_id) == 12:
         caller_id = caller_id[2:]
     try:
