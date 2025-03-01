@@ -246,6 +246,9 @@ def leads():
     leads = current_user.get_leads(conn)
     for lead in leads:
         lead.assigned_to = User.get(lead.user_id, conn).username
+        if not current_user.admin:
+            # censor the phone number
+            lead.phone_number = lead.phone_number[:2] + "XXXX" + lead.phone_number[-4:]
     return render_template("lead/lead.html", leads=leads)
 
 @app.route("/lead/<lead_id>", methods=["POST", "GET"])
@@ -272,10 +275,16 @@ def lead(lead_id: int = None):
     lead_assigned_to = User.get(lead.user_id, conn)
     lead.assigned_to = lead_assigned_to.username
     users = User.get_all(conn)
+    # put the current assignee on top 
+    users.remove(lead_assigned_to)
+    users.insert(0, lead_assigned_to)
     timeline = create_timeline(lead)
     statuses_for_lead = statuses
     statuses.remove(lead.status)
     statuses_for_lead.insert(0, lead.status)
+    if not current_user.admin:
+        # censor the phone number
+        lead.phone_number = lead.phone_number[:2] + "XXXX" + lead.phone_number[-4:]
     return render_template(
         "lead/details.html",
         lead=lead,
