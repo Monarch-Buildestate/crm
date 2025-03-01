@@ -19,7 +19,7 @@ class Call:
         self.call_id = query[1]
         self.uuid = query[2]
         self.description = query[3]
-        self.time = datetime.strptime(query[4].replace("+05:30", ""), "%Y-%m-%d %H:%M:%S") + timedelta(hours=5, minutes=30) 
+        self.time = datetime.strptime(query[4], "%Y-%m-%d %H:%M:%S") # we don't need to store timezone info
         self.duration = query[5]
         self.agent_number = query[6]
         self.client_number = query[7]
