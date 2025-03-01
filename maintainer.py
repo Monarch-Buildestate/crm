@@ -14,22 +14,22 @@ def fetch_records(page=1):
     if not tatatelekey:
         print("Tata Tele key not found")
         exit(1)
-    url = "https://api-smartflo.tatateleservices.com/v1/call/records?"
+    url = "https://api-smartflo.tatateleservices.com/v1/call/records?"+"did_numbers=" + creds.get("did_number")
     payload = {}
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "Authorization": tatatelekey,
     }
-    params = {"Authorization": tatatelekey, "did_number": creds.get("did_number")}
     if page:
-        params['page'] = str(page)
+        url += "&page=" + str(page)
     response = requests.get(
         url,
         json=payload,
         headers=headers,
-        params=params,
     )
+    print("making a request to ")
+    print(response.url)
     # write this response.json to a file
     with open("test.json", "w+") as f:
         dump(response.json(), f, indent=4)
