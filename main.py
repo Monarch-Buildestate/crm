@@ -286,7 +286,7 @@ def lead(lead_id: int = None):
         return redirect(url_for("lead"))
     if not current_user.admin and lead.user_id != current_user.id:
         # don't allow access to other user's leads if not admin
-        return redirect(url_for("lead"))
+        return redirect(url_for("leads"))
     lead_assigned_to = User.get(lead.user_id, conn)
     lead.assigned_to = lead_assigned_to.username
     users = User.get_all(conn)
@@ -389,8 +389,8 @@ def create_lead():
 
         email = request.form["email"]
         address = request.form["city"]
-        Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, conn=conn)
-        return redirect(url_for("leads"))
+        lead = Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, conn=conn)
+        return redirect(url_for("lead", lead_id=lead.id))
     return render_template("lead/create.html")
 
 
@@ -448,7 +448,7 @@ def transfer_call(call_id, new_number):
     return redirect(url_for("active_calls"))
 
 def censor_phone_number(phone_number):
-    return phone_number[:2] + "XXXX" + phone_number[-4:]
+    return phone_number[:4] + "XXXX" + phone_number[-4:]
 
 
 @app.route("/calls")

@@ -132,6 +132,9 @@ class Lead:
     
     @staticmethod
     def create(name=None, phone_number=None, email=None, address=None, user_id=1, conn: sqlite3.Connection = None):
+        older_lead = Lead.get_by_phone_number(phone_number, conn)
+        if older_lead:
+            return older_lead
         with conn:
             cur = conn.cursor()
             cur.execute(
