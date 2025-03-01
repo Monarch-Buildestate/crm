@@ -540,16 +540,13 @@ def initiate_call():
     return response.json()
 
 
-@app.route("/api/dialplan", methods=["POST"])
+@app.route("/api/dialplan", methods=["GET"])
 def dialplan():
-    print(request.get_data())
-    print(request.get_json())
-    print(request.args)
-    caller_id = request.get_json().get("caller_id_number").strip()
+    caller_id = request.args.get("caller_id_number").strip()
     #caller_id = request.args.get("caller_id_number").strip()
     if "+" in caller_id:
         caller_id = caller_id.replace("+", "")
-    print(caller_id)
+    caller_id = str(int(caller_id)) # remove leading zeros
     if len(caller_id) == 12:
         caller_id = caller_id[2:]
     try:
