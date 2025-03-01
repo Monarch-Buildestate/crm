@@ -248,7 +248,7 @@ def leads():
         lead.assigned_to = User.get(lead.user_id, conn).username
         if not current_user.admin:
             # censor the phone number
-            lead.phone_number = lead.phone_number[:2] + "XXXX" + lead.phone_number[-4:]
+            lead.phone_number = censor_phone_number(lead.phone_number)
     return render_template("lead/lead.html", leads=leads)
 
 @app.route("/lead/<lead_id>", methods=["POST", "GET"])
@@ -284,7 +284,7 @@ def lead(lead_id: int = None):
     statuses_for_lead.insert(0, lead.status)
     if not current_user.admin:
         # censor the phone number
-        lead.phone_number = lead.phone_number[:2] + "XXXX" + lead.phone_number[-4:]
+        lead.phone_number = censor_phone_number(lead.phone_number)
     return render_template(
         "lead/details.html",
         lead=lead,
@@ -431,6 +431,9 @@ def transfer_call(call_id, new_number):
     response = requests.post(url, json=payload, headers=headers)
     return redirect(url_for("active_calls"))
 
+def censor_phone_number(phone_number):
+    return phone_number[:2] + "XXXX" + phone_number[-4:]
+
 
 @app.route("/calls")
 @login_required
@@ -439,6 +442,11 @@ def calls():
         calls = get_call_details()
     else:
         calls = get_call_details(current_user.phone_number)
+    if not current_user.admin:
+        # censor the phone number
+        for call in calls:
+            call.client_number = censor_phone_number(call.client_number)
+
     return render_template("call/calls.html", calls=calls)
 
 @app.route("/api/webhook/event/call_answered")
