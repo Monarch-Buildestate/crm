@@ -43,54 +43,57 @@ go_for_front = False
 interval = 120
 page_count = 0
 
-if not __name__ == "__main__":	
-    print("This script should be run as main")
-    exit(1)
-    
-while True:
-    # get oldest record  and length of records
-    page_count += 1 
-    cursor = conn.cursor()
-    if not go_for_front:
-        cursor.execute("SELECT * FROM calls ORDER BY call_time DESC")
-        last_record = cursor.fetchall()
-        total_records_count= len(last_record)
-        if last_record:
-            last_record = last_record[0]
-            last_record = Call(last_record)
-        
-        # if each page have 20 records. we will be requesting page number total_records/20 + 1 
-        records = fetch_records(page_count)
-        if total_records_count >= records.get('count'):
-            go_for_front = True
-            print("No new records")
-            continue # make a request to front already without waiting anymore
-    else:
-        records = fetch_records(1)
-        print("FETCHING FROM FRONT")
-    with conn:
+def main():
+
+    while True:
+        # get oldest record  and length of records
+        page_count += 1 
         cursor = conn.cursor()
-        for record in records.get("results"):
-            call = Call.from_dict(record)
-            try:
-                cursor.execute(
-                    "INSERT INTO calls VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                    (
-                        call.id,
-                        call.call_id,
-                        call.uuid,
-                        call.description,
-                        call.time,
-                        call.duration,
-                        call.agent_number,
-                        call.client_number,
-                        call.recording_url,
-                        call.did_number,
-                        call.status,
-                    ),
-                )
-            except sqlite3.IntegrityError:
-                print("Record already exists")
-                pass
-        conn.commit()
-    sleep(interval)
+        if not go_for_front:
+            cursor.execute("SELECT * FROM calls ORDER BY call_time DESC")
+            last_record = cursor.fetchall()
+            total_records_count= len(last_record)
+            if last_record:
+                last_record = last_record[0]
+                last_record = Call(last_record)
+            
+            # if each page have 20 records. we will be requesting page number total_records/20 + 1 
+            records = fetch_records(page_count)
+            if total_records_count >= records.get('count'):
+                go_for_front = True
+                print("No new records")
+                continue # make a request to front already without waiting anymore
+        else:
+            records = fetch_records(1)
+            print("FETCHING FROM FRONT")
+        with conn:
+            cursor = conn.cursor()
+            for record in records.get("results"):
+                call = Call.from_dict(record)
+                try:
+                    cursor.execute(
+                        "INSERT INTO calls VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        (
+                            call.id,
+                            call.call_id,
+                            call.uuid,
+                            call.description,
+                            call.time,
+                            call.duration,
+                            call.agent_number,
+                            call.client_number,
+                            call.recording_url,
+                            call.did_number,
+                            call.status,
+                        ),
+                    )
+                except sqlite3.IntegrityError:
+                    print("Record already exists")
+                    pass
+            conn.commit()
+        sleep(interval)
+
+
+
+if __name__ == "__main__":
+    main()	
