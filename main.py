@@ -525,6 +525,12 @@ def initiate_call():
 @app.route("/api/dialplan", methods=["POST"])
 def dialplan():
     caller_id = request.args.get("caller_id_number")
+    try:
+        response = requests.get("https://monarch.clatos.com/api/tatateleDialPlan?caller_id_number="+caller_id).json()
+        return response # if old system have the response. send the response
+    except requests.exceptions.JSONDecodeError:
+        pass
+
     with conn:
         lead = Lead.get_by_phone_number(caller_id, conn)
         if not lead:
