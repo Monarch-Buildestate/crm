@@ -278,7 +278,7 @@ def lead(lead_id: int = None):
         new_email = request.form["email"]
         new_address = request.form["address"]
         lead = Lead.get(lead_id, conn)
-        lead.update(new_name, new_email, new_address, conn)
+        lead.update_details(new_name, new_email, new_address, conn)
         return redirect(url_for("lead", lead_id=lead_id))
     
     lead = Lead.get(lead_id, conn)
