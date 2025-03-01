@@ -1,4 +1,11 @@
 {
     "tata_tele_api_key": "YOUR TATA TELE API KEY",
     "did_number": "YOUR DID NUMBER to prevent mix ups",
+    "statuses": [
+        "Not Connected",
+        "Connected-Interested",
+        "Not Interested",
+        "Site Visit Pending",
+        "Site Visit Done"
+    ]
 }
