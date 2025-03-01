@@ -533,9 +533,12 @@ def dialplan():
 
     with conn:
         lead = Lead.get_by_phone_number(caller_id, conn)
-        if not lead:
+        agent = User.get(lead.user_id, conn)
+        if not lead or not agent:
             return "Failover"
-        return [{"transfer": {"type": "number", "data": [lead.agent.phone_number]}}]
+        if not agent.phone_number:
+            return "Failover"
+        return [{"transfer": {"type": "number", "data": [agent.phone_number]}}]
 
 
 if __name__ == "__main__":
