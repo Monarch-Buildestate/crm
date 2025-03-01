@@ -331,6 +331,9 @@ def pending_leads():
             continue
         if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time < datetime.now(): # if time is gone then add to pending
             pending.append(lead)
+    if not current_user.admin:
+        for lead in pending:
+            lead.phone_number = censor_phone_number(lead.phone_number)
     return render_template("lead/lead.html", leads=pending)
 
 @app.route("/lead/<lead_id>/comment", methods=["POST"])
