@@ -134,6 +134,20 @@ with conn:
 
     conn.commit()
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("home/page-404.html"), 404
+
+
+@app.errorhandler(403)
+def page_forbidden(e):
+    return render_template("home/page-403.html"), 403
+
+# 500
+@app.errorhandler(500)
+def page_error(e):
+    return render_template("home/page-500.html"), 500
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
