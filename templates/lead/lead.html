@@ -62,6 +62,7 @@
                       <th>Updated At</th>
                       <th>Next Follow Up</th>
                       <th>Assigned To</th>
+                      <th>Lead Status</th>
                     </tr>
                   </thead>
                   {% for lead in leads %}
@@ -74,6 +75,7 @@
                         <td>{{ lead.last_follow_up_time }}</td>
                         <td>{{ lead.next_follow_up_time }}</td>
                         <td>{{ lead.assigned_to }}</td>
+                        <td>{{ lead.status }}</td>
                     </tr>
                   {% endfor %}
                 </table>

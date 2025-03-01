@@ -21,6 +21,7 @@ class FollowUp:
             hours=5, minutes=30
         )  # UTC+5:30
         self.time = self.created_at
+        self.status = query[7]
 
     def json(self):
         return {
@@ -31,6 +32,7 @@ class FollowUp:
             "follow_up_user_id": self.follow_up_user_id,
             "remarks": self.remarks,
             "created_at": self.created_at,
+            "status": self.status,
         }
 
     def delete(self, conn):
@@ -49,11 +51,11 @@ class FollowUp:
             return FollowUp(follow_up)
         
     @staticmethod
-    def create(userid, lead_id, follow_up_time, follow_up_user_id, remarks, conn):
+    def create(userid, lead_id, follow_up_time, follow_up_user_id, remarks, status, conn):
         with conn:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO follow_ups (user_id, lead_id, follow_up_time, follow_up_user_id, remarks) VALUES (?,?,?,?,?)",
-                (userid, lead_id, follow_up_time, follow_up_user_id, remarks),
+                "INSERT INTO follow_ups (user_id, lead_id, follow_up_time, follow_up_user_id, remarks, status) VALUES (?,?,?,?,?,?)",
+                (userid, lead_id, follow_up_time, follow_up_user_id, remarks, status),
             )
             conn.commit()

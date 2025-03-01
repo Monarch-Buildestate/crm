@@ -37,6 +37,13 @@ try:
     did_number = config.get("did_number", None)
     if did_number:
         did_number = did_number.replace("+", "")
+    statuses = config.get("statuses",[
+        "Not Connected",
+        "Connected-Interested",
+        "Not Interested",
+        "Site Visit Pending",
+        "Site Visit Done"
+    ])
 except FileNotFoundError:
     config = {}
     with open("config.json", "w+") as f:
@@ -99,6 +106,15 @@ with conn:
         );"""
     )
     conn.commit()
+    cur.execute("PRAGMA table_info(follow_ups)")
+    columns = cur.fetchall()
+    columns = [column[1] for column in columns]
+    if "status" not in columns:
+        cur.execute(f"ALTER TABLE follow_ups ADD COLUMN status TEXT DEFAULT '{statuses[0]}'")
+        conn.commit()
+        # fill the status column with default values
+        cur.execute(f"UPDATE lead SET status='{statuses[0]}'")
+        conn.commit()
     cur.execute(
         """CREATE TABLE IF NOT EXISTS calls (
             id TEXT PRIMARY KEY NOT NULL,
@@ -256,12 +272,17 @@ def lead(lead_id: int = None):
     lead_assigned_to = User.get(lead.user_id, conn)
     lead.assigned_to = lead_assigned_to.username
     users = User.get_all(conn)
+    timeline = create_timeline(lead)
+    statuses_for_lead = statuses
+    statuses.remove(lead.status)
+    statuses_for_lead.insert(0, lead.status)
     return render_template(
         "lead/details.html",
         lead=lead,
-        events=create_timeline(lead),
+        events=timeline,
         users= users,
         current_time=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+        lead_status=statuses_for_lead
     )
 
 @app.route("/lead/<lead_id>/delete")
@@ -307,15 +328,19 @@ def delete_comment(lead_id, comment_id):
 @app.route("/lead/<lead_id>/followup", methods=["POST"])
 @login_required
 def followup(lead_id):
+    lead = Lead.get(lead_id, conn)
+    if not lead:
+        return "Lead not found"
     follow_up_time = datetime.strptime(request.form["follow-up-time"], "%Y-%m-%dT%H:%M")
     follow_up_user_id = request.form.get("follow_up_user_id", None)
+    status = request.form.get("status", statuses[0])
     if request.form.get("follow-up-select") == "no":
         follow_up_time = None
     if not follow_up_user_id:
         follow_up_user_id = current_user.id
     remarks = request.form["remarks"]
     FollowUp.create(
-        current_user.id, lead_id, follow_up_time, follow_up_user_id, remarks, conn
+        current_user.id, lead_id, follow_up_time, follow_up_user_id, remarks, status=status, conn=conn
     )
     return redirect(url_for("lead", lead_id=lead_id))
 

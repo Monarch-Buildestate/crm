@@ -20,8 +20,8 @@ class Lead:
         self.user_id = query[1]
         self.name = query[2]
         self.phone_number = query[3]
-        self.email = '' if query[4] == "None" else query[4]
-        self.address = '' if query[5] == "None" else query[5]
+        self.email = '' if str(query[4]) == "None" else query[4]
+        self.address = '' if str(query[5]) == "None" else query[5]
         with conn:
             self.comments = self.get_comments(conn)
             self.follow_ups = self.get_follow_ups(conn)
@@ -36,6 +36,10 @@ class Lead:
         else:
             self.last_follow_up_time = None
             self.next_follow_up_time = None
+        if self.follow_ups:
+            self.status = self.follow_ups[-1].status
+        else:
+            self.status = "Not Connected"
 
     def get_comments(self, conn: sqlite3.Connection):
         with conn:
