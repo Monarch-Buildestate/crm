@@ -71,7 +71,7 @@
                 </div>
                 {% for event in event_list %}
                   <div>
-                    <i class="fas {% if 'comment' in event %}fa-comments bg-yellow{% elif 'call_id' in event %}fa-phone bg-green{% else %}fa-reply bg-blue{% endif %}"></i>
+                    <i class="fas {% if 'comment' in event %}fa-comments bg-yellow{% elif 'call_id' in event %}{% if event['status'] == 'missed' %}fa-phone bg-red{%else%} fa-phone bg-green{% endif %}{% else %}fa-reply bg-blue{% endif %}"></i>
                     <div class="timeline-item">
                       <span class="time"><i class="fas fa-clock"></i> {{ event['created_at'] }}</span>
                       <h3 class="timeline-header">
@@ -95,7 +95,7 @@
                           {{ event['comment'] }}
                         {% elif 'call_id' in event %}
                           {{event['status']}} | {{event['description']}} <br> Call duration: {{ event['duration'] }} seconds <br>
-                          {% if event['recording_url'] %}
+                          {% if event['status'] != "missed" %}
                             <audio controls>
                               <source src="{{ event['recording_url'] }}" type="audio/mpeg">
                               Your browser does not support the audio element.
@@ -103,10 +103,11 @@
                           {% endif %}
                         {% else %}
                           {% if event['follow_up_time'] %}
-                            {{ event['remarks'] }} <br>Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }}
+                            <b>{{ event['remarks'] }}</b> <br>Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }} 
                           {% else %}
                             {{ event['remarks'] }}
                           {% endif %}
+                          <br>Lead Status: {{event['status']}}
                         {% endif %}
                       </div>
                     </div>
@@ -117,7 +118,8 @@
           </div>
           <div class="lead-details">
             <h3>Lead Details ({{lead.id}})</h3>
-            <h2>Lead Assigned To: {{lead.assigned_to}}</h2>
+            <h2>Lead For: {{lead.assigned_to}}</h2>
+            <h2>Lead Status: {{lead.status}}</h2>
             <form action="/lead/{{ lead.id }}/assign" method="POST">
               <label>Assign To</label>
               <select class="form-control" name="new_assignee">
@@ -170,7 +172,7 @@
                 </div>
                 <div class="form-group">
                   <label>Lead Status</label>
-                  <select class="form-control">
+                  <select class="form-control" name="status" id="status">
                     {% for status in lead_status %}
                       <option value="{{ status }}">{{ status }}</option>
                     {% endfor %}
