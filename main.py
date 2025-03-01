@@ -193,7 +193,7 @@ def slash():
     for lead in all_leads:
         if lead.created_at.date() == datetime.now().date():
             leads_created_today += 1
-        if lead.follow_ups:
+        if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
             if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
                 leads_to_address_today += 1
         else:
@@ -314,7 +314,7 @@ def pending_leads():
         if not lead.follow_ups:
             pending.append(lead)
             continue
-        if lead.follow_ups[-1].follow_up_time < datetime.now(): # if time is gone then add to pending
+        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time < datetime.now(): # if time is gone then add to pending
             pending.append(lead)
     return render_template("lead/lead.html", leads=pending)
 
