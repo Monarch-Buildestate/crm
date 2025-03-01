@@ -408,7 +408,8 @@ def get_active_calls():
 
 @app.route("/calls/active")
 def active_calls():
-    calls =[{'id': 90143183, 'user_id': 45536, 'client_id': None, 'call_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'direction': 2, 'source': '+916396614787', 'type': 'click-to-call', 'did': '+918069551858', 'multiple_destination_type': 'c2c', 'multiple_destination_name': 'PJSIP/917297915965', 'destination': '+917297915965', 'state': 'Answered', 'queue_state': None, 'channel_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'created_at': '2025-02-27 11:52:09', 'sip_domain': '127.0.0.1', 'broadcast_id': None, 'broadcast_no': None, 'call_time': '00:00:19', 'agent_name': 'Monarch Admin', 'customer_number': '917297915965'}]
+    calls = get_active_calls()
+    #calls =[{'id': 90143183, 'user_id': 45536, 'client_id': None, 'call_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'direction': 2, 'source': '+916396614787', 'type': 'click-to-call', 'did': '+918069551858', 'multiple_destination_type': 'c2c', 'multiple_destination_name': 'PJSIP/917297915965', 'destination': '+917297915965', 'state': 'Answered', 'queue_state': None, 'channel_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'created_at': '2025-02-27 11:52:09', 'sip_domain': '127.0.0.1', 'broadcast_id': None, 'broadcast_no': None, 'call_time': '00:00:19', 'agent_name': 'Monarch Admin', 'customer_number': '917297915965'}]
     can_be_transfered_to = User.get_all(conn)
     can_be_transfered_to = [user for user in can_be_transfered_to if user.phone_number and user.phone_number != current_user.phone_number]
     can_be_transfered_to = [{"id": user.id, "name": user.username, "phone_number": user.phone_number} for user in can_be_transfered_to]
