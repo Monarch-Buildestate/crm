@@ -199,6 +199,10 @@
       followUpDate.style.display = followUpSelect.value === "yes" ? "block" : "none";
     }
     toggleFollowUpDate();
+    document.addEventListener('DOMContentLoaded', function() {
+      var calender = document.getElementById("follow-up-time");
+      calender.min = new Date().toISOString().slice(0,new Date().toISOString().lastIndexOf(":"));
+    });
     var agent_number = "{{ current_user.phone_number }}";
     var lead_id = "{{ lead.id }}";
     function call(){
