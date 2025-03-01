@@ -25,6 +25,7 @@ login_manager = LoginManager()
 app = Flask(__name__)
 app.secret_key = "12345abcdefgh"
 login_manager.init_app(app)
+login_manager.login_view = "login"
 
 try:
     os.chdir("/var/www/crm")
@@ -133,6 +134,20 @@ with conn:
 
     conn.commit()
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("home/page-404.html"), 404
+
+
+@app.errorhandler(403)
+def page_forbidden(e):
+    return render_template("home/page-403.html"), 403
+
+# 500
+@app.errorhandler(500)
+def page_error(e):
+    return render_template("home/page-500.html"), 500
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -193,7 +208,7 @@ def slash():
     for lead in all_leads:
         if lead.created_at.date() == datetime.now().date():
             leads_created_today += 1
-        if lead.follow_ups:
+        if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
             if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
                 leads_to_address_today += 1
         else:
@@ -263,7 +278,7 @@ def lead(lead_id: int = None):
         new_email = request.form["email"]
         new_address = request.form["address"]
         lead = Lead.get(lead_id, conn)
-        lead.update(new_name, new_email, new_address, conn)
+        lead.update_details(name=new_name, phone_number=lead.phone_number, email=new_email, address=new_address, conn=conn)
         return redirect(url_for("lead", lead_id=lead_id))
     
     lead = Lead.get(lead_id, conn)
@@ -271,7 +286,7 @@ def lead(lead_id: int = None):
         return redirect(url_for("lead"))
     if not current_user.admin and lead.user_id != current_user.id:
         # don't allow access to other user's leads if not admin
-        return redirect(url_for("lead"))
+        return redirect(url_for("leads"))
     lead_assigned_to = User.get(lead.user_id, conn)
     lead.assigned_to = lead_assigned_to.username
     users = User.get_all(conn)
@@ -314,8 +329,11 @@ def pending_leads():
         if not lead.follow_ups:
             pending.append(lead)
             continue
-        if lead.follow_ups[-1].follow_up_time < datetime.now(): # if time is gone then add to pending
+        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time < datetime.now(): # if time is gone then add to pending
             pending.append(lead)
+    if not current_user.admin:
+        for lead in pending:
+            lead.phone_number = censor_phone_number(lead.phone_number)
     return render_template("lead/lead.html", leads=pending)
 
 @app.route("/lead/<lead_id>/comment", methods=["POST"])
@@ -374,8 +392,8 @@ def create_lead():
 
         email = request.form["email"]
         address = request.form["city"]
-        Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, conn=conn)
-        return redirect(url_for("leads"))
+        lead = Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, conn=conn)
+        return redirect(url_for("lead", lead_id=lead.id))
     return render_template("lead/create.html")
 
 
@@ -433,7 +451,7 @@ def transfer_call(call_id, new_number):
     return redirect(url_for("active_calls"))
 
 def censor_phone_number(phone_number):
-    return phone_number[:2] + "XXXX" + phone_number[-4:]
+    return phone_number[:4] + "XXXX" + phone_number[-4:]
 
 
 @app.route("/calls")
