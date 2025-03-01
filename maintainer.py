@@ -63,6 +63,10 @@ def main():
                 go_for_front = True
                 print("No new records")
                 continue # make a request to front already without waiting anymore
+            if not records.get("results"):
+                go_for_front = True
+                print("No new records")
+                continue
         else:
             records = fetch_records(1)
             print("FETCHING FROM FRONT")
