@@ -42,6 +42,11 @@ def fetch_records(page=1):
 go_for_front = False
 interval = 120
 page_count = 0
+
+if not __name__ == "__main__":	
+    print("This script should be run as main")
+    exit(1)
+    
 while True:
     # get oldest record  and length of records
     page_count += 1 
