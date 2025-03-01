@@ -542,7 +542,11 @@ def initiate_call():
 
 @app.route("/api/dialplan", methods=["POST"])
 def dialplan():
-    caller_id = request.args.get("caller_id_number").strip()
+    print(request.get_data())
+    print(request.get_json())
+    print(request.args)
+    caller_id = request.get_json().get("caller_id_number").strip()
+    #caller_id = request.args.get("caller_id_number").strip()
     if "+" in caller_id:
         caller_id = caller_id.replace("+", "")
     print(caller_id)
