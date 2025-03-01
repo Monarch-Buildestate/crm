@@ -25,6 +25,7 @@ login_manager = LoginManager()
 app = Flask(__name__)
 app.secret_key = "12345abcdefgh"
 login_manager.init_app(app)
+login_manager.login_view = "login"
 
 try:
     os.chdir("/var/www/crm")
