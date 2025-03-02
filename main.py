@@ -564,8 +564,10 @@ def dialplan():
             return "Failover"
         if not agent.phone_number:
             return "Failover"
+        """
         if agent.id == 1:
             return "Failover ADMIN DOESN't TAKE CALLS"
+        """
         return [{"transfer": {"type": "number", "data": [agent.phone_number]}}]
 
 
