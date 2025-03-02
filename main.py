@@ -201,7 +201,10 @@ def slash():
     if not current_user.is_authenticated:
         return redirect(url_for("login"))
     # create some hopelessly trying to look good graphics
-    all_leads = Lead.get_all(admin=True, conn=conn)
+    if current_user.admin:
+        all_leads = Lead.get_all(admin=True, conn=conn)
+    else:
+        all_leads = current_user.get_leads(conn)
     leads_to_address_today = 0
     leads_created_today = 0
     leads_addressed_today = 0
@@ -219,6 +222,9 @@ def slash():
     calls = Call.get_all(conn)
     calls_today = []
     for call in calls:
+        if not current_user.admin:
+            if current_user.phone_number not in [call.agent_number, call.client_number]:
+                continue # if not related to this user, then skip
         if call.time.date() == datetime.now().date():
             calls_today.append(call)
         else:
