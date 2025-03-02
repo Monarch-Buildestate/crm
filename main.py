@@ -7,6 +7,7 @@ from flask_login import (
     logout_user,
     current_user,
 )
+import pytz
 import requests
 import sqlite3
 from classes.User import User
@@ -209,7 +210,7 @@ def slash():
     leads_created_today = 0
     leads_addressed_today = 0
     for lead in all_leads:
-        if lead.created_at.date() == datetime.now().date():
+        if lead.created_at.date() == datetime.now(tz=pytz.timezone("Asia/Kolkata")).date():
             leads_created_today += 1
         if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
             if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
@@ -217,7 +218,7 @@ def slash():
         else:
             leads_to_address_today += 1 # if no follow up then add to today's list
         for fu in lead.follow_ups:
-            if fu.created_at.date() == datetime.now().date():
+            if fu.created_at.date() == datetime.now(tz=pytz.timezone("Asia/Kolkata")).date():
                 leads_addressed_today += 1
     calls = Call.get_all(conn)
     calls_today = []
@@ -225,7 +226,7 @@ def slash():
         if not current_user.admin:
             if current_user.phone_number not in [call.agent_number, call.client_number]:
                 continue # if not related to this user, then skip
-        if call.time.date() == datetime.now().date():
+        if call.time.date() == datetime.now(tz=pytz.timezone("Asia/Kolkata")).date():
             calls_today.append(call)
         else:
             break # since calls are sorted by time, we can break here
@@ -311,7 +312,7 @@ def lead(lead_id: int = None):
         lead=lead,
         events=timeline,
         users= users,
-        current_time=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+        current_time=datetime.now(tz=pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%dT%H:%M"),
         lead_status=statuses_for_lead
     )
 
@@ -335,7 +336,7 @@ def pending_leads():
         if not lead.follow_ups:
             pending.append(lead)
             continue
-        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time < datetime.now(): # if time is gone then add to pending
+        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time < datetime.now(tz=pytz.timezone("Asia/Kolkata")): # if time is gone then add to pending
             pending.append(lead)
     if not current_user.admin:
         for lead in pending:
