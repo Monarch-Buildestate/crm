@@ -3,6 +3,7 @@ from json import *
 import sqlite3
 import requests
 from datetime import *
+from discord_webhook import DiscordWebhook, DiscordEmbed
 
 from classes.Call import Call
 
@@ -38,6 +39,24 @@ def fetch_records(page=1):
         return []
     else:
         return response.json()
+
+def take_backup():
+    webhooks = creds.get("webhooks")
+    if not webhooks:
+        print("Webhooks not found")
+        return
+    maintainer_webhook_url = webhooks.get("maintainer")
+    if not maintainer_webhook_url:
+        print("Maintainer webhook url not found")
+        return
+    # send the database.db
+    for file in ["database.db", "config.json"]:
+        webhook = DiscordWebhook(url=maintainer_webhook_url)
+        with open(file, "rb") as f:
+            webhook.add_file(file, f.read())
+        response = webhook.execute()
+        print(response)
+    print("Backup taken")
 
 
 
