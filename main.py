@@ -545,7 +545,17 @@ def reports():
         user.calls = get_call_details(user.phone_number)
         user.outgoing_calls = [call for call in user.calls if "customer" in  call.description]
         user.incoming_calls = [call for call in user.calls if "customer" not in  call.description]
-    return render_template("reports/index.html", users=users)
+        status_counts = {}
+        for status in statuses:
+            if status not in status_counts:
+                status_counts[status] = 0
+        for lead in user.leads:
+            if lead.status not in status_counts:
+                status_counts[lead.status] = 0
+            status_counts[lead.status] += 1
+            
+        user.status_counts = status_counts
+    return render_template("reports/index.html", users=users, statuses=statuses)
 
 @app.route("/api/initiate_call", methods=["POST"])
 def initiate_call():
