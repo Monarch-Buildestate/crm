@@ -576,6 +576,8 @@ def call_missed():
 def add_facebook_lead():
     name = request.args.get("FULL_NAME")
     phone_number = request.args.get("PHONE")
+    phone_number = phone_number.replace("+", "")
+    phone_number = phone_number[-10:] # last 10 digits
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
     
