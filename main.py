@@ -291,7 +291,7 @@ def lead(lead_id: int = None):
     
     lead = Lead.get(lead_id, conn)
     if not lead:
-        return redirect(url_for("lead"))
+        return redirect(url_for("leads"))
     if not current_user.admin and lead.user_id != current_user.id:
         # don't allow access to other user's leads if not admin
         return redirect(url_for("leads"))
