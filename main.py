@@ -254,7 +254,6 @@ def create_timeline(lead: Lead):
 @app.route("/lead/<lead_id>/assign", methods=["POST"])
 @login_required
 def assign_lead(lead_id):
-    print(request.form)
     new_user_id = request.form.get("new_assignee")
     if not new_user_id:
         return redirect(url_for("lead", lead_id=lead_id))

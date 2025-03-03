@@ -183,7 +183,6 @@ class Lead:
     
     @staticmethod
     def get_all(admin=False, user_id=None, conn: sqlite3.Connection = None):
-        print(admin)
         with conn:
             cur = conn.cursor()
             if admin:
