@@ -114,6 +114,7 @@ def main():
                     print("Record already exists")
                     pass
             conn.commit()
+        take_backup()
         sleep(interval)
 
 
