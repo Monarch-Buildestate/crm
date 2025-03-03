@@ -55,52 +55,34 @@
                 <table id="calldetails" class="table table-bordered table-striped">
                   <thead>
                     <tr>
-                        <th>Name</th>
-                      {% for user in users %}
-                        <th>{{ user.name }}</th>
+                      <th>Name</th>
+                      <th>Leads</th>
+                      <th>Unaddressed Leads</th>
+                      <th>Calls</th>
+                      <th>Calls Outgoing</th>
+                      <th>Calls Incoming</th>
+                      {% for status in statuses %}
+                        <th>{{ status }}</th>
                       {% endfor %}
                     </tr>
                   </thead>
-                  <tr>
-                    <td>Leads</td>
+                  <tbody>
                     {% for user in users %}
+                      <tr>
+                        <td>{{ user.name }}</td>
                         <td>{{ user.leads|length }}</td>
-                      {% endfor %}
-                  </tr>
-                  <tr>
-                    <td>Unaddressed Leads</td>
-                    {% for user in users %}
-                      <td>{{ user.unaddressed_leads|length }}</td>
+                        <td>{{ user.unaddressed_leads|length }}</td>
+                        <td>{{ user.calls|length }}</td>
+                        <td>{{ user.outgoing_calls|length }}</td>
+                        <td>{{ user.incoming_calls|length }}</td>
+                        {% for status in statuses %}
+                          <td>{{ user.status_counts[status] }}</td>
+                        {% endfor %}
+                      </tr>
                     {% endfor %}
-                  </tr>
-                  <tr>
-                    <td>Calls</td>
-                    {% for user in users %}
-                      <td>{{ user.calls|length }}</td>
-                    {% endfor %}
-                  </tr>
-                  <tr>
-                    <td>Calls Outgoing</td>
-                    {% for user in users %}
-                      <td>{{ user.outgoing_calls|length }}</td>
-                    {% endfor %}
-                  </tr>
-                  <tr>
-                    <td>Calls Incoming</td>
-                    {% for user in users %}
-                      <td>{{ user.incoming_calls|length }}</td>
-                    {% endfor %}
-                  </tr>
-                  {% for status in statuses %}
-                    <tr>
-                      <td>{{ status }}</td>
-                      {% for user in users %}
-                        <td>{{ user.status_counts[status] }}</td>
-                      {% endfor %}
-                    </tr>
-                  {% endfor %}
+                  </tbody>
                 </table>
-              </div>
+              </div>              
               <!-- /.card-body -->
             </div>
             <!-- /.card -->
