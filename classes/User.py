@@ -55,3 +55,25 @@ class User(UserMixin):
             for u in users:
                 us.append(User(*u))
         return us
+
+    def delete(self, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM users WHERE id=?", (self.id,))
+            conn.commit()
+        return True
+    
+    def edit(self,username, password, phone_number, email, position, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET username=?, password=?, phone_number=?, email=?, position=? WHERE id=?", (username, password, phone_number, email, position, self.id))
+            conn.commit()
+        return True
+        
+    @staticmethod
+    def create(username, password, phone_number, email, position, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("INSERT INTO users (username, password, phone_number, email, position) VALUES (?,?,?,?,?)", (username, password, phone_number, email, position))
+            conn.commit()
+        return True

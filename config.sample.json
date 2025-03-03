@@ -7,5 +7,9 @@
         "Not Interested",
         "Site Visit Pending",
         "Site Visit Done"
-    ]
+    ],
+    "webhooks" : {
+        "maintainer": "YOUR WEBHOOK URL",
+        "events": "YOUR WEBHOOK"
+    }
 }

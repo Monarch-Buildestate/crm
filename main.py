@@ -254,7 +254,6 @@ def create_timeline(lead: Lead):
 @app.route("/lead/<lead_id>/assign", methods=["POST"])
 @login_required
 def assign_lead(lead_id):
-    print(request.form)
     new_user_id = request.form.get("new_assignee")
     if not new_user_id:
         return redirect(url_for("lead", lead_id=lead_id))
@@ -405,6 +404,56 @@ def create_lead():
     return render_template("lead/create.html")
 
 
+
+@app.route("/user/create", methods=["POST", "GET"]) 
+@login_required
+def create_user():
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    if request.method == "POST":
+        print(request.form)
+        username = request.form["name"]
+        password = request.form["password"]
+        email = request.form["email"]
+        phone_number = request.form["number"]
+        User.create(username=username, password=password, email=email, phone_number=phone_number, position=2, conn=conn)
+        return redirect(url_for("users"))
+    return render_template("user/create.html")
+    
+@app.route("/user/<user_id>/delete")
+@login_required
+def delete_user(user_id):
+    if not current_user.admin:
+        return
+    return "DISABLED"
+    leads = current_user.get_leads(conn)
+    for lead in leads:
+        lead.assign(1, conn)
+    User.get(user_id, conn).delete(conn)
+    return redirect(url_for("users"))
+@app.route("/users")
+@login_required
+def users():
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    users = User.get_all(conn)
+    return render_template("user/users.html", users=users)
+
+@app.route("/user/<user_id>", methods=["POST", "GET"])
+@login_required
+def user(user_id):
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    user = User.get(user_id, conn)
+    if request.method == "POST":
+        username = request.form["name"]
+        email = request.form["email"]
+        phone_number = request.form["phone_number"]
+        password = request.form["password"]
+        user.edit(username=username, password=password, email=email, phone_number=phone_number, position=user.position, conn=conn)
+        return redirect(url_for("user", user_id=user_id)) 
+    return render_template("user/details.html", user=user)
+
 def get_call_details(agent_number=None):
     with conn:
         cur = conn.cursor()
@@ -527,6 +576,8 @@ def call_missed():
 def add_facebook_lead():
     name = request.args.get("FULL_NAME")
     phone_number = request.args.get("PHONE")
+    phone_number = phone_number.replace("+", "")
+    phone_number = phone_number[-10:] # last 10 digits
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
     
@@ -545,7 +596,17 @@ def reports():
         user.calls = get_call_details(user.phone_number)
         user.outgoing_calls = [call for call in user.calls if "customer" in  call.description]
         user.incoming_calls = [call for call in user.calls if "customer" not in  call.description]
-    return render_template("reports/index.html", users=users)
+        status_counts = {}
+        for status in statuses:
+            if status not in status_counts:
+                status_counts[status] = 0
+        for lead in user.leads:
+            if lead.status not in status_counts:
+                status_counts[lead.status] = 0
+            status_counts[lead.status] += 1
+            
+        user.status_counts = status_counts
+    return render_template("reports/index.html", users=users, statuses=statuses)
 
 @app.route("/api/initiate_call", methods=["POST"])
 def initiate_call():
