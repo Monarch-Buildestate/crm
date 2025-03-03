@@ -337,7 +337,7 @@ def pending_leads():
         if not lead.follow_ups:
             pending.append(lead)
             continue
-        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time < datetime.now(tz=pytz.timezone("Asia/Kolkata")): # if time is gone then add to pending
+        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time.replace(tzinfo=pytz.timezone("Asia/Kolkata")) < datetime.now(tz=pytz.timezone("Asia/Kolkata")): # if time is gone then add to pending
             pending.append(lead)
     if not current_user.admin:
         for lead in pending:
