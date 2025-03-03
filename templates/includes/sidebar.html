@@ -24,44 +24,8 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!--
-          <li class="nav-item has-treeview {% if 'layout' in segment %} menu-open {% endif %}">
-            <a href="#" class="nav-link {% if 'layout' in segment %} active {% endif %}">
-              <i class="nav-icon fas fa-copy"></i>
-              <p>
-                Layout Options
-                <i class="fas fa-angle-left right"></i>
-                <span class="badge badge-info right">6</span>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="/layout-top-nav-sidebar.html" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
-                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                  <p>Top Navigation + Sidebar</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/layout-boxed.html" class="nav-link {% if 'layout-boxed' in segment %} active {% endif %}">
-                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                  <p>Boxed</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-header">EXAMPLES</li>
-          <li class="nav-item">
-            <a href="/calendar.html" class="nav-link">
-              <i class="nav-icon far fa-calendar-alt"></i>
-              <p>
-                Calendar
-                <span class="badge badge-info right">2</span>
-              </p>
-            </a>
-          </li>
-          </li>-->
-          <li class="nav-item has-treeview {% if 'layout' in segment %} menu-open {% endif %}">
-            <a href="#" class="nav-link {% if 'layout' in segment %} active {% endif %}">
+          <li class="nav-item has-treeview {% if 'dashboard' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link">
               <i class="nav-icon fa fa-phone"></i>
               <p>
                 Calls
@@ -71,21 +35,21 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="/calls" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
+                <a href="/calls" class="nav-link ">
                   <i class="fa fa-arrow-right" aria-hidden="true"></i>
                   <p>All Calls</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/calls/active" class="nav-link {% if 'layout-boxed' in segment %} active {% endif %}">
+                <a href="/calls/active" class="nav-link">
                   <i class="fa fa-arrow-right" aria-hidden="true"></i>
                   <p>Active Call</p>
                 </a>
               </li>
             </ul>
           </li>
-          <li class="nav-item has-treeview {% if 'layout' in segment %} menu-open {% endif %}">
-            <a href="#" class="nav-link {% if 'layout' in segment %} active {% endif %}">
+          <li class="nav-item has-treeview  {% if 'dashboard' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link">
               <i class="nav-icon fa fa-users"></i>
               <p>
                 Leads
@@ -95,25 +59,46 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="/lead" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
+                <a href="/lead" class="nav-link">
                   <i class="fa fa-arrow-right" aria-hidden="true"></i>
                   <p>All Leads</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/lead/create" class="nav-link {% if 'layout-top' in segment %} active {% endif %}">
+                <a href="/lead/create" class="nav-link">
                   <i class="fa fa-arrow-right" aria-hidden="true"></i>
                   <p>Create Lead</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/lead/pending" class="nav-link {% if 'layout-boxed' in segment %} active {% endif %}">
+                <a href="/lead/pending" class="nav-link">
                   <i class="fa fa-arrow-right" aria-hidden="true"></i>
                   <p>Pending Action</p>
                 </a>
               </li>
             </ul>
           </li>
+          {%if current_user.admin %}
+          <!-- reports -->
+          <li class="nav-item has-treeview {% if 'report' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fa fa-chart-line"></i>
+              <p>
+                Reports
+                <i class="fas fa-angle-left right"></i>
+                <span class="badge badge-info right"></span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/reports" class="nav-link">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                  <p>Report</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          {%endif%}
       </nav>
       <!-- /.sidebar-menu -->
     </div>
