@@ -52,8 +52,7 @@ def take_backup():
     # send the database.db
     for file in ["database.db", "config.json"]:
         webhook = DiscordWebhook(url=maintainer_webhook_url)
-        with open(file, "rb") as f:
-            webhook.add_file(file, f.read())
+        webhook.add_file(file=open(file, "rb"),filename=file)
         response = webhook.execute()
         print(response)
     print("Backup taken")
