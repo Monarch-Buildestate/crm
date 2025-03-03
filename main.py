@@ -425,6 +425,7 @@ def create_user():
 def delete_user(user_id):
     if not current_user.admin:
         return
+    return "DISABLED"
     leads = current_user.get_leads(conn)
     for lead in leads:
         lead.assign(1, conn)
