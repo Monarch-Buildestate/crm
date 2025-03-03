@@ -404,6 +404,55 @@ def create_lead():
     return render_template("lead/create.html")
 
 
+
+@app.route("/user/create", methods=["POST", "GET"]) 
+@login_required
+def create_user():
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    if request.method == "POST":
+        print(request.form)
+        username = request.form["name"]
+        password = request.form["password"]
+        email = request.form["email"]
+        phone_number = request.form["number"]
+        User.create(username=username, password=password, email=email, phone_number=phone_number, position=2, conn=conn)
+        return redirect(url_for("users"))
+    return render_template("user/create.html")
+    
+@app.route("/user/<user_id>/delete")
+@login_required
+def delete_user(user_id):
+    if not current_user.admin:
+        return
+    leads = current_user.get_leads(conn)
+    for lead in leads:
+        lead.assign(1, conn)
+    User.get(user_id, conn).delete(conn)
+    return redirect(url_for("users"))
+@app.route("/users")
+@login_required
+def users():
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    users = User.get_all(conn)
+    return render_template("user/users.html", users=users)
+
+@app.route("/user/<user_id>", methods=["POST", "GET"])
+@login_required
+def user(user_id):
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    user = User.get(user_id, conn)
+    if request.method == "POST":
+        username = request.form["name"]
+        email = request.form["email"]
+        phone_number = request.form["phone_number"]
+        password = request.form["password"]
+        user.edit(username=username, password=password, email=email, phone_number=phone_number, position=user.position, conn=conn)
+        return redirect(url_for("user", user_id=user_id)) 
+    return render_template("user/details.html", user=user)
+
 def get_call_details(agent_number=None):
     with conn:
         cur = conn.cursor()
