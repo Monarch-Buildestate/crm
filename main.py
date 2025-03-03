@@ -533,6 +533,20 @@ def add_facebook_lead():
     Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn)
     return "Lead added"
 
+@app.route("/reports")
+@login_required
+def reports():
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    users = User.get_all(conn)
+    for user in users:
+        user.leads = user.get_leads(conn)
+        user.unaddressed_leads = [lead for lead in user.leads if not lead.follow_ups or not lead.follow_ups[-1].follow_up_time]
+        user.calls = get_call_details(user.phone_number)
+        user.outgoing_calls = [call for call in user.calls if "customer" in  call.description]
+        user.incoming_calls = [call for call in user.calls if "customer" not in  call.description]
+    return render_template("reports/index.html", users=users)
+
 @app.route("/api/initiate_call", methods=["POST"])
 def initiate_call():
     if not tatatelekey:
