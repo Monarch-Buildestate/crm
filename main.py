@@ -16,6 +16,7 @@ from classes.Comment import Comment
 from classes.FollowUp import FollowUp
 from classes.Call import Call
 
+import typing
 from datetime import datetime
 import os
 import json
@@ -461,6 +462,14 @@ def censor_phone_number(phone_number):
     return phone_number[:4] + "XXXX" + phone_number[-4:]
 
 
+def user_or_lead(number, users:typing.List[User], leads:typing.List[Lead]) -> typing.Optional[typing.Union[User, Lead]]:
+    for user in users:
+        if user.phone_number == number:
+            return user
+    for lead in leads:
+        if lead.phone_number == number:
+            return lead
+
 @app.route("/calls")
 @login_required
 def calls():
@@ -468,6 +477,10 @@ def calls():
         calls = get_call_details()
     else:
         calls = get_call_details(current_user.phone_number)
+
+    for call in calls:
+        call.user = User.get_by_phone_number(call.agent_number, conn)
+        call.lead = Lead.get_by_phone_number(call.client_number, conn)
     if not current_user.admin:
         # censor the phone number
         for call in calls:

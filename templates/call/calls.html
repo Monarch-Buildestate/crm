@@ -65,8 +65,8 @@
                   {% for call in calls %}
                     <tr>
                         <td>{{ call.time }} IST</td>
-                        <td>{{ call.agent_number }}</td>
-                        <td>{{ call.client_number}}</td>
+                        <td>{{call.user.name}}</a> {{ call.agent_number}}</td>
+                        <td><a href="url_for('leads', {{call.lead.id}})"> {{call.lead.name}}</a> {{ call.client_number}}</td>
                         <td>{{ call.call_id }}</td>
                         <td>{{call.description}}</td>
                         {% if call.recording_url %}
