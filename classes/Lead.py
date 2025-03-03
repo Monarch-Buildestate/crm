@@ -100,6 +100,8 @@ class Lead:
     
     @staticmethod
     def get_by_phone_number(phone_number, conn: sqlite3.Connection):
+        # strip phone number to be last 10 digits
+        phone_number = "".join(filter(str.isdigit, phone_number))[-10:]
         with conn:
             cur = conn.cursor()
             # like 
