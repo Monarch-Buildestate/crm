@@ -215,7 +215,8 @@ def slash():
             leads_created_today += 1
         if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
             if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
-                leads_to_address_today += 1
+                if lead.status != "Not Interested":
+                    leads_to_address_today += 1
         else:
             leads_to_address_today += 1 # if no follow up then add to today's list
         for fu in lead.follow_ups:
