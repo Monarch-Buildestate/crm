@@ -336,8 +336,11 @@ def pending_leads():
         if not lead.follow_ups:
             pending.append(lead)
             continue
-        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time.replace(tzinfo=pytz.timezone("Asia/Kolkata")) < datetime.now(tz=pytz.timezone("Asia/Kolkata")): # if time is gone then add to pending
-            pending.append(lead)
+        if lead.status == "Not Interested":
+            continue
+        if lead.follow_ups[-1].follow_up_time:
+            if lead.follow_ups[-1].follow_up_time.replace(tzinfo=pytz.timezone("Asia/Kolkata")).date() <= datetime.now(tz=pytz.timezone("Asia/Kolkata")).date(): # if time is gone then add to pending
+                pending.append(lead)
     if not current_user.admin:
         for lead in pending:
             lead.phone_number = censor_phone_number(lead.phone_number)
