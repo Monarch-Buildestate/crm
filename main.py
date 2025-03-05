@@ -577,11 +577,12 @@ def add_facebook_lead():
     name = request.args.get("FULL_NAME")
     phone_number = request.args.get("PHONE")
     phone_number = phone_number.replace("+", "")
+    city = request.args.get("CITY", "")
     phone_number = phone_number[-10:] # last 10 digits
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
     
-    Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn)
+    Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=address)
     return "Lead added"
 
 @app.route("/reports")
