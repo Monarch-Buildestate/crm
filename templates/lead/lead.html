@@ -63,6 +63,7 @@
                       <th>Email</th>
                       <th>Assigned To</th>
                       <th>Lead Status</th>
+                      <th>Address</th>
                     </tr>
                   </thead>
                   {% for lead in leads %}
@@ -76,6 +77,7 @@
                         <td>{{ lead.email }}</td>
                         <td>{{ lead.assigned_to }}</td>
                         <td>{{ lead.status }}</td>
+                        <td>{{ lead.address }}</td>
                     </tr>
                   {% endfor %}
                 </table>
