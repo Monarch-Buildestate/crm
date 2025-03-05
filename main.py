@@ -587,7 +587,7 @@ def add_facebook_lead():
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
     
-    Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=address)
+    Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=city)
     return "Lead added"
 
 @app.route("/reports")
