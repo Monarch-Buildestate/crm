@@ -213,11 +213,13 @@ def slash():
     for lead in all_leads:
         if lead.created_at.date() == datetime.now(tz=pytz.timezone("Asia/Kolkata")).date():
             leads_created_today += 1
-        if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
-            if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
-                leads_to_address_today += 1
-        else:
-            leads_to_address_today += 1 # if no follow up then add to today's list
+        if lead.status != "Not Interested":
+            if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
+                if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
+                    if lead.status != "Not Interested":
+                        leads_to_address_today += 1
+            else:
+                leads_to_address_today += 1 # if no follow up then add to today's list
         for fu in lead.follow_ups:
             if fu.created_at.date() == datetime.now(tz=pytz.timezone("Asia/Kolkata")).date():
                 leads_addressed_today += 1
@@ -336,8 +338,11 @@ def pending_leads():
         if not lead.follow_ups:
             pending.append(lead)
             continue
-        if lead.follow_ups[-1].follow_up_time and lead.follow_ups[-1].follow_up_time.replace(tzinfo=pytz.timezone("Asia/Kolkata")) < datetime.now(tz=pytz.timezone("Asia/Kolkata")): # if time is gone then add to pending
-            pending.append(lead)
+        if lead.status == "Not Interested":
+            continue
+        if lead.follow_ups[-1].follow_up_time:
+            if lead.follow_ups[-1].follow_up_time.replace(tzinfo=pytz.timezone("Asia/Kolkata")).date() <= datetime.now(tz=pytz.timezone("Asia/Kolkata")).date(): # if time is gone then add to pending
+                pending.append(lead)
     if not current_user.admin:
         for lead in pending:
             lead.phone_number = censor_phone_number(lead.phone_number)
