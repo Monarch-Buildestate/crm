@@ -22,9 +22,28 @@
         </div>
       </div>
     </form>
-
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+          <i class="far fa-bell"></i>
+          <span class="badge badge-warning navbar-badge">{{current_user.unread_count}}</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+          <span class="dropdown-item dropdown-header">{{current_user.unread_count}} Notifications</span>
+          {% for notification in current_user.notifications %}
+          <div class="dropdown-divider"></div>
+          <a href="{{notification.href}}" onclick="resolve({{notification.id}})" class="dropdown-item {% if notification.resolved %}bg-light{% endif %}">
+            {% if "lead" in notification.href %}
+            <i class="fas fa-envelope mr-2"></i> {{notification.content}}
+            {% else %}
+            <!--its a call-->
+            <i class="fas fa-phone mr-2"></i> {{notification.content}}
+            {% endif %}
+          </a>
+          {% endfor %}
+          
+      </li>
       
       <!-- Messages Dropdown Menu -->
       <li class="nav-item dropdown">
@@ -43,3 +62,8 @@
   </nav>
   <a href="/lead/create" class="bg-primary" style="position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; text-align: center; color: white; font-size: 30px; line-height: 50px;">+</a>
   <!-- /.navbar -->
+  <script>
+    function resolve(id){
+      fetch(`/resolve/${id}`)
+    }
+  </script>

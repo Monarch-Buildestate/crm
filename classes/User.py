@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from .Lead import Lead
+from .Notification import Notification
 
 import sqlite3
 
@@ -19,6 +20,16 @@ class User(UserMixin):
     def get_id(self):
         return self.id
 
+    def get_notifications(self, conn: sqlite3.Connection):
+        return Notification.get_all(self.id, conn)
+    
+    def add_notification(self, content:str, href:str, resolved:bool, conn: sqlite3.Connection):
+        with conn:
+            cur = conn.cursor()
+            cur.execute("INSERT INTO notifications (user_id, content, href, resolved) VALUES (?,?,?,?)", (self.id, content, href, resolved))
+            conn.commit()
+        return True
+    
     @staticmethod
     def get(user_id, conn: sqlite3.Connection):
         # load the config file
@@ -29,7 +40,12 @@ class User(UserMixin):
             if not user:
                 return None
             user_id, username, password, phone_number, email, position = user
-            return User(user_id, username, password, phone_number, email, position)
+            user = User(user_id, username, password, phone_number, email, position)
+            user.notifications = user.get_notifications(conn)[::-1] # reverse to get latest notification first
+            user.unread_count = len([n for n in user.notifications if not n.resolved])
+            for n in user.notifications:
+                print(n.resolved)
+            return user
         return None
 
     def get_leads(self, conn: sqlite3.Connection):

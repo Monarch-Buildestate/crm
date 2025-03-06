@@ -94,6 +94,20 @@ with conn:
     """
     )
     conn.commit()
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS notifications     (
+            id INTEGER PRIMARY KEY, 
+            user_id INTEGER,  
+            content TEXT, 
+            href TEXT, 
+            resolved BOOLEAN,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+    """
+    )
+    conn.commit()
     # follow ups
     cur.execute(
         """CREATE TABLE IF NOT EXISTS follow_ups (
@@ -242,7 +256,15 @@ def slash():
         calls_made_today=calls_made_today,
     )
 
-
+@app.route("/resolve/<notification_id>", methods=["GET"])
+def resolve(notification_id:int=None):
+    if not notification_id:
+        return redirect(url_for("slash"))
+    with conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE notifications SET resolved=1 WHERE id=?", (notification_id,))
+        conn.commit()
+    return "Done"
 def create_timeline(lead: Lead):
     if not lead.events:
         return {}

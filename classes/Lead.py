@@ -5,6 +5,7 @@ from .Call import Call
 import os
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+from .Notification import Notification
 
 try:
     os.chdir("/var/www/crm")
@@ -135,7 +136,7 @@ class Lead:
         return None
     
     @staticmethod
-    def create(name=None, phone_number=None, email=None, address=None, user_id=1, conn: sqlite3.Connection = None):
+    def create(name=None, phone_number=None, email=None, address=None, user_id=1, conn: sqlite3.Connection = None, notify:bool=True):
         older_lead = Lead.get_by_phone_number(phone_number, conn)
         if older_lead:
             return older_lead
@@ -146,14 +147,18 @@ class Lead:
                 (name, phone_number, email, address, user_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
             )
             conn.commit()
+            if notify:
+                Notification.add(user_id, f"New Lead: {name}", f"/lead/{cur.lastrowid}", False, conn)
             return Lead.get(cur.lastrowid, conn)
         return None
 
-    def assign(self, user_id, conn: sqlite3.Connection):
+    def assign(self, user_id, conn: sqlite3.Connection, notify:bool=True):
         with conn:
             cur = conn.cursor()
             cur.execute("UPDATE lead SET user_id=? WHERE id=?", (user_id, self.id))
             conn.commit()
+            if notify:
+                Notification.add(user_id, f"Lead Assigned: {self.name}", f"/lead/{self.id}", False, conn)
             return True
         return False
     def json(self):
