@@ -11,5 +11,10 @@
     "webhooks" : {
         "maintainer": "YOUR WEBHOOK URL",
         "events": "YOUR WEBHOOK"
+    },
+    "webpush":{
+        "public_key": "",
+        "private_key": "",
+        "sender_info": ""
     }
 }

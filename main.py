@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify, send_file, send_from_directory
 from flask_login import (
     UserMixin,
     LoginManager,
@@ -15,6 +15,7 @@ from classes.Lead import Lead
 from classes.Comment import Comment
 from classes.FollowUp import FollowUp
 from classes.Call import Call
+from flask_pywebpush import WebPush, WebPushException
 
 import typing
 from datetime import datetime
@@ -28,6 +29,7 @@ app = Flask(__name__)
 app.secret_key = "12345abcdefgh"
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
 
 try:
     os.chdir("/var/www/crm")
@@ -47,11 +49,14 @@ try:
         "Site Visit Pending",
         "Site Visit Done"
     ])
+    push = WebPush(private_key=config['webpush']['private_key'],
+                   sender_info=config['webpush']['sender_info'])
 except FileNotFoundError:
     config = {}
     with open("config.json", "w+") as f:
         json.dump(config, f, indent=4)
     tatatelekey = None
+    push = None
 
 with conn:
     cur = conn.cursor()
@@ -120,6 +125,16 @@ with conn:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             FOREIGN KEY(user_id) REFERENCES users(id), 
             FOREIGN KEY(lead_id) REFERENCES lead(id)
+        );"""
+    )
+    conn.commit()
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS subscriptions (
+            id INTEGER PRIMARY KEY, 
+            user_id INTEGER, 
+            data VARCHAR,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            FOREIGN KEY(user_id) REFERENCES users(id)
         );"""
     )
     conn.commit()
@@ -204,6 +219,41 @@ def login():
 def load_user(user_id):
     return User.get(user_id, conn=conn)
 
+@app.route("/subscribe", methods=["POST", 'GET'])
+@login_required
+def subscribe():
+    if request.method == "GET":
+        return render_template("home/subscribe.html")
+    else:
+        data = request.json
+        print(data)
+        if not data or "endpoint" not in data:
+            return jsonify({"error": "Invalid subscription"}), 400
+        
+        cur.execute("INSERT INTO subscriptions (user_id, data) values(?,?)", (current_user.id, data))
+        return jsonify({"message": "Subscribed successfully"}), 201
+    
+@app.route("/send_notification", methods=["GET"])
+def send_notification():
+    """Send a push notification to Current user as test."""
+    data = request.json
+    message = data.get("message", "Default Notification")
+
+    cur.execute("SELECT * FROM subscriptions WHERE user_id=?", (current_user.id))
+    subscriptions = [data[2] for data in cur.fetchall()]
+    for sub in subscriptions:
+        try:
+            push.send(
+                subscription=sub, 
+                notification={'title':'test test test test', 'body': 'test body', 'href':"/lead/1"})
+        except WebPushException as ex:
+            return f"Web Push failed: {ex}"
+
+    return jsonify({"message": "Notification sent"}), 200
+
+@app.route("/sw.js")
+def swjs():
+    return send_file("static/assets/js/sw.js", mimetype="application/javascript")
 
 @app.route("/logout")
 @login_required
@@ -687,6 +737,11 @@ def dialplan():
             return "Failover"
         if not agent.phone_number:
             return "Failover"
+        try:
+            agent.add_notification(f"Call from {lead.name}", f"/lead/{lead.id}", resolved=False, conn=conn)
+        except Exception as e:
+            print(e)
+            pass
         """
         if agent.id == 1:
             return "Failover ADMIN DOESN't TAKE CALLS"
