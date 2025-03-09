@@ -159,7 +159,7 @@
             </form>
             <button class="btn btn-primary" onclick="call()">📞</button>
             {% if current_user.admin %}
-              <a href="/lead/{{ lead.id }}/delete" class="btn btn-danger">Delete</a>
+              <a href="/lead/{{ lead.id }}/delete" onclick="return confirm('Are you sure?')" class="btn btn-danger">Delete</a>
             {% endif %}
             <div class="follow-up-form">
               <h4>Add a Follow-Up</h4>
