@@ -49,7 +49,7 @@ try:
         "Site Visit Pending",
         "Site Visit Done"
     ])
-    push = WebPush(private_key=config['webpush']['private_key'],
+    push = WebPush(app=app, private_key=config['webpush']['private_key'],
                    sender_info=config['webpush']['sender_info'])
 except FileNotFoundError:
     config = {}
@@ -225,23 +225,24 @@ def subscribe():
     if request.method == "GET":
         return render_template("home/subscribe.html")
     else:
-        data = request.json
-        print(data)
+        data = request.json.get("sub_token")
         if not data or "endpoint" not in data:
             return jsonify({"error": "Invalid subscription"}), 400
         
         cur.execute("INSERT INTO subscriptions (user_id, data) values(?,?)", (current_user.id, data))
+        conn.commit()
         return jsonify({"message": "Subscribed successfully"}), 201
     
-@app.route("/send_notification", methods=["GET"])
+@app.route("/send_notification", methods=["GET", "POST"])
 def send_notification():
     """Send a push notification to Current user as test."""
     data = request.json
     message = data.get("message", "Default Notification")
 
-    cur.execute("SELECT * FROM subscriptions WHERE user_id=?", (current_user.id))
+    cur.execute("SELECT * FROM subscriptions WHERE user_id=?", (current_user.id,))
     subscriptions = [data[2] for data in cur.fetchall()]
     for sub in subscriptions:
+        sub = json.loads(sub)
         try:
             push.send(
                 subscription=sub, 

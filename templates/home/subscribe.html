@@ -20,7 +20,7 @@
 {% endblock stylesheets %}
 
 {% block content %}
-
+<button id="test">TEST</button>
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
@@ -32,7 +32,7 @@
   <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>
     const PUBLIC_VAPID_KEY = "BPTBcT6_yjiI5Fb8L-WTd-x7NmAhSxqXV8jBPh0PU7qPak3rib6Ym2IqWhYYRM4w-vBgSxDRTAXaU-WdNr6yMqg";  // Use the public key from Flask
-
+    let swRegistration = null;
     async function registerServiceWorker() {
         if ("serviceWorker" in navigator) {
             try {
@@ -46,32 +46,26 @@
     }
 
     async function subscribeUser() {
-        const registration = await registerServiceWorker();
-        if (!registration || !("PushManager" in window)) {
-            console.error("Push Messaging is not supported");
-            return;
-        }
-
-        try {
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
+        const applicationServerKey = urlBase64ToUint8Array(PUBLIC_VAPID_KEY);
+        swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+        })
+        .then(function(subscription) {
+            console.log('User is subscribed.');
+            console.log(subscription)
+            localStorage.setItem('sub_token',JSON.stringify(subscription));
+            isSubscribed = true;
+            $.ajax({
+                type: "POST",
+                url: "/subscribe",
+                contentType: 'application/json; charset=utf-8',
+                dataType:'json',
+                data: JSON.stringify({'sub_token':localStorage.getItem('sub_token')}),
+            }).catch(function(err) {
+                console.log('Failed to subscribe the user: ', err);
             });
-            console.log("whatever")
-
-            console.log("Push Subscription:", JSON.stringify(subscription));
-
-            // Send subscription to your Flask backend
-            await fetch("/subscribe", {
-                method: "POST",
-                body: JSON.stringify(subscription),
-                headers: { "Content-Type": "application/json" },
-            });
-
-            console.log("Subscription sent to server");
-        } catch (error) {
-            console.error("Subscription Failed:", error);
-        }
+        })
     }
 
     // Convert VAPID key to Uint8Array
@@ -81,11 +75,32 @@
         const rawData = atob(base64);
         return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
     }
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        console.log('Service Worker and Push is supported');
 
+        navigator.serviceWorker.register("/sw.js")
+            .then(function(swReg) {
+                console.log('Service Worker is registered', swReg);
+                swRegistration = swReg;
+            })
+            .catch(function(error) {
+                console.error('Service Worker Error', error);
+            });
+    } else {
+        console.warn('Push meapplicationServerPublicKeyssaging is not supported');
+    }
     // Call the subscribe function when the page loads and then redirect to the home page
     window.addEventListener("load", async () => {
         await subscribeUser();
-        window.location.href = "/";
+        //window.location.href = "/";
+    });
+
+    document.getElementById('test').addEventListener('click', async () => {
+        fetch('/send_notification', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: "Hello User!" })
+        });
     });
 
   </script>
