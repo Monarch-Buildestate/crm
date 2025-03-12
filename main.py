@@ -587,6 +587,7 @@ def transfer_call(call_id, new_number):
     return redirect(url_for("active_calls"))
 
 def censor_phone_number(phone_number):
+    return phone_number # temporary
     return phone_number[:4] + "XXXX" + phone_number[-4:]
 
 
