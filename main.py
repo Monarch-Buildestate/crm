@@ -145,8 +145,21 @@ with conn:
         cur.execute(f"ALTER TABLE follow_ups ADD COLUMN status TEXT DEFAULT '{statuses[0]}'")
         conn.commit()
         # fill the status column with default values
-        cur.execute(f"UPDATE lead SET status='{statuses[0]}'")
+        cur.execute(f"UPDATE follow_ups SET status='{statuses[0]}'")
         conn.commit()
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS calls (
+            id TEXT PRIMARY KEY NOT NULL,
+            call_id TEXT,
+            description TEXT,
+            call_time TIMESTAMP,
+            call_duration INTEGER,
+            agent_number TEXT,
+            client_number TEXT,
+            recording_url TEXT,
+            status TEXT
+        )"""
+    )
     conn.commit()
 
 @app.errorhandler(404)
