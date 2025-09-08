@@ -68,7 +68,7 @@
             <form action="/lead/{{ lead.id }}/comment" method="POST">
               <div class="form-group">
                 <div class="comment-box">
-                  <textarea id="comment" name="comment" class="form-control" placeholder="Add a new comment..."></textarea>
+                  <textarea id="comment" name="comment" class="form-control" required placeholder="Add a new comment..."></textarea>
                   <button class="btn btn-primary mt-2">Submit</button>
                 </div>
             </form>
@@ -159,7 +159,7 @@
             </form>
             <button class="btn btn-primary" onclick="call()">📞</button>
             {% if current_user.admin %}
-              <a href="/lead/{{ lead.id }}/delete" class="btn btn-danger">Delete</a>
+              <a href="/lead/{{ lead.id }}/delete" onclick="return confirm('Are you sure?')" class="btn btn-danger">Delete</a>
             {% endif %}
             <div class="follow-up-form">
               <h4>Add a Follow-Up</h4>
@@ -173,7 +173,7 @@
                 </div>
                 <div class="form-group" id="follow-up-date">
                   <label>Follow-Up Time</label>
-                  <input type="datetime-local" class="form-control" name="follow-up-time" id="follow-up-time" value="{{ current_time }}">
+                  <input type="datetime-local" class="form-control" name="follow-up-time" id="follow-up-time">
                 </div>
                 <div class="form-group">
                   <label>Remarks</label>
@@ -206,6 +206,8 @@
       var followUpSelect = document.getElementById("follow-up-select");
       var followUpDate = document.getElementById("follow-up-date");
       followUpDate.style.display = followUpSelect.value === "yes" ? "block" : "none";
+      // make the follow-up date required if follow-up is selected
+      document.getElementById("follow-up-time").required = followUpSelect.value === "yes";
     }
     toggleFollowUpDate();
     document.addEventListener('DOMContentLoaded', function() {

@@ -446,11 +446,12 @@ def followup(lead_id):
     lead = Lead.get(lead_id, conn)
     if not lead:
         return "Lead not found"
-    follow_up_time = datetime.strptime(request.form["follow-up-time"], "%Y-%m-%dT%H:%M")
     follow_up_user_id = request.form.get("follow_up_user_id", None)
     status = request.form.get("status", statuses[0])
     if request.form.get("follow-up-select") == "no":
         follow_up_time = None
+    else:
+        follow_up_time = datetime.strptime(request.form["follow-up-time"], "%Y-%m-%dT%H:%M")
     if not follow_up_user_id:
         follow_up_user_id = current_user.id
     remarks = request.form["remarks"]
@@ -589,6 +590,7 @@ def transfer_call(call_id, new_number):
     return redirect(url_for("active_calls"))
 
 def censor_phone_number(phone_number):
+    return phone_number # temporary
     return phone_number[:4] + "XXXX" + phone_number[-4:]
 
 
