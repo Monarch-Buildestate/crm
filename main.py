@@ -345,7 +345,8 @@ def leads():
         lead.assigned_to = User.get(lead.user_id, conn).username
         if not current_user.admin:
             # censor the phone number
-            lead.phone_number = censor_phone_number(lead.phone_number)
+            #lead.phone_number = censor_phone_number(lead.phone_number)
+            ...
     return render_template("lead/lead.html", leads=leads)
 
 @app.route("/lead/<lead_id>", methods=["POST", "GET"])
@@ -381,7 +382,8 @@ def lead(lead_id: int = None):
     statuses_for_lead.insert(0, lead.status)
     if not current_user.admin:
         # censor the phone number
-        lead.phone_number = censor_phone_number(lead.phone_number)
+        #lead.phone_number = censor_phone_number(lead.phone_number)
+        ...
     return render_template(
         "lead/details.html",
         lead=lead,
@@ -418,7 +420,8 @@ def pending_leads():
                 pending.append(lead)
     if not current_user.admin:
         for lead in pending:
-            lead.phone_number = censor_phone_number(lead.phone_number)
+            #lead.phone_number = censor_phone_number(lead.phone_number)
+            ...
     return render_template("lead/lead.html", leads=pending)
 
 @app.route("/lead/<lead_id>/comment", methods=["POST"])
@@ -600,6 +603,7 @@ def user_or_lead(number, users:typing.List[User], leads:typing.List[Lead]) -> ty
 @app.route("/calls")
 @login_required
 def calls():
+    return redirect(url_for("slash"))
     if current_user.admin:
         calls = get_call_details()
     else:
@@ -611,12 +615,14 @@ def calls():
     if not current_user.admin:
         # censor the phone number
         for call in calls:
-            call.client_number = censor_phone_number(call.client_number)
+            #call.client_number = censor_phone_number(call.client_number)
+            ...
 
     return render_template("call/calls.html", calls=calls)
 
 @app.route("/api/webhook/event/call_answered")
 def call_answered():
+    return "disabled"
     caller_id_number = request.args.get("caller_id_number", None)
     if not caller_id_number:
         return "Invalid data"
@@ -638,6 +644,7 @@ def call_answered():
 
 @app.route("/api/webhook/event/call_missed")
 def call_missed():
+    return "disabled"
     caller_id_number = request.args.get("caller_id_number", None)
     if not caller_id_number:
         return "Invalid data"
@@ -689,6 +696,7 @@ def reports():
 
 @app.route("/api/initiate_call", methods=["POST"])
 def initiate_call():
+    return "disabled"
     if not tatatelekey:
         return "No key found"
     data = request.get_json()
@@ -716,6 +724,7 @@ def initiate_call():
 
 @app.route("/api/dialplan", methods=["GET"])
 def dialplan():
+    return "disabled"
     caller_id = request.args.get("caller_id_number").strip()
     #caller_id = request.args.get("caller_id_number").strip()
     if "+" in caller_id:
