@@ -147,22 +147,6 @@ with conn:
         # fill the status column with default values
         cur.execute(f"UPDATE lead SET status='{statuses[0]}'")
         conn.commit()
-    cur.execute(
-        """CREATE TABLE IF NOT EXISTS calls (
-            id TEXT PRIMARY KEY NOT NULL,
-            call_id TEXT,
-            uuid TEXT,
-            description TEXT,
-            call_time TIMESTAMP,
-            call_duration INTEGER,
-            agent_number TEXT,
-            client_number TEXT,
-            recording_url TEXT,
-            did_number TEXT,
-            status TEXT
-        )"""
-    )
-
     conn.commit()
 
 @app.errorhandler(404)
@@ -513,6 +497,7 @@ def delete_user(user_id):
         lead.assign(1, conn)
     User.get(user_id, conn).delete(conn)
     return redirect(url_for("users"))
+
 @app.route("/users")
 @login_required
 def users():
@@ -536,59 +521,6 @@ def user(user_id):
         return redirect(url_for("user", user_id=user_id)) 
     return render_template("user/details.html", user=user)
 
-def get_call_details(agent_number=None):
-    with conn:
-        cur = conn.cursor()
-        if agent_number is None:
-            cur.execute("SELECT * FROM calls WHERE did_number=? ORDER BY call_time", (did_number,))
-        else:
-            cur.execute("SELECT * FROM calls WHERE agent_number=? AND did_number=? ORDER BY call_time", (agent_number,did_number,))
-        calls = cur.fetchall()
-        calls = [Call(call) for call in calls]
-        # sort by call time
-    return calls
-
-
-def get_active_calls(): 
-    url = "https://api-smartflo.tatateleservices.com/v1/live_calls"
-    payload = {}
-    headers = {
-        "accept": "application/json",
-        "Authorization": tatatelekey
-    }
-    params = {"did_number": config.get("did_number")}   
-    response = requests.get(url, json=payload, headers=headers, params=params)
-    if response.status_code != 200:
-        return []
-    active_calls = response.json()
-    return active_calls
-
-@app.route("/calls/active")
-def active_calls():
-    calls = get_active_calls()
-    #calls =[{'id': 90143183, 'user_id': 45536, 'client_id': None, 'call_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'direction': 2, 'source': '+916396614787', 'type': 'click-to-call', 'did': '+918069551858', 'multiple_destination_type': 'c2c', 'multiple_destination_name': 'PJSIP/917297915965', 'destination': '+917297915965', 'state': 'Answered', 'queue_state': None, 'channel_id': '8992c734-8807-42dc-9887-da5a1190b27d', 'created_at': '2025-02-27 11:52:09', 'sip_domain': '127.0.0.1', 'broadcast_id': None, 'broadcast_no': None, 'call_time': '00:00:19', 'agent_name': 'Monarch Admin', 'customer_number': '917297915965'}]
-    can_be_transfered_to = User.get_all(conn)
-    can_be_transfered_to = [user for user in can_be_transfered_to if user.phone_number and user.phone_number != current_user.phone_number]
-    can_be_transfered_to = [{"id": user.id, "name": user.username, "phone_number": user.phone_number} for user in can_be_transfered_to]
-    return render_template("call/active.html", active_calls=calls, transfer=can_be_transfered_to)
-
-@app.route("/calls/transfer/<call_id>/<new_number>", methods=["POST"])
-def transfer_call(call_id, new_number):
-    call_id = request.args.get("call_id")
-    url = "https://api-smartflo.tatateleservices.com/v1/call/options"
-    payload = {
-        "type": 4,
-        "call_id": call_id,
-        "intercom": new_number
-    }
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "Authorization": tatatelekey,
-    }
-    response = requests.post(url, json=payload, headers=headers)
-    return redirect(url_for("active_calls"))
-
 def censor_phone_number(phone_number):
     return phone_number # temporary
     return phone_number[:4] + "XXXX" + phone_number[-4:]
@@ -601,63 +533,6 @@ def user_or_lead(number, users:typing.List[User], leads:typing.List[Lead]) -> ty
     for lead in leads:
         if lead.phone_number == number:
             return lead
-
-@app.route("/calls")
-@login_required
-def calls():
-    return redirect(url_for("slash"))
-    if current_user.admin:
-        calls = get_call_details()
-    else:
-        calls = get_call_details(current_user.phone_number)
-
-    for call in calls:
-        call.user = User.get_by_phone_number(call.agent_number, conn)
-        call.lead = Lead.get_by_phone_number(call.client_number, conn)
-    if not current_user.admin:
-        # censor the phone number
-        for call in calls:
-            #call.client_number = censor_phone_number(call.client_number)
-            ...
-
-    return render_template("call/calls.html", calls=calls)
-
-@app.route("/api/webhook/event/call_answered")
-def call_answered():
-    return "disabled"
-    caller_id_number = request.args.get("caller_id_number", None)
-    if not caller_id_number:
-        return "Invalid data"
-    answered_agent_number = request.args.get("answered_agent_number", None)
-    if not answered_agent_number:
-        return "Invalid data"
-    # get user of that agent
-    # last 12 digits
-    agent = User.get_by_phone_number(answered_agent_number[-12:], conn)
-    if not agent:
-        return "Agent not found"
-    answered_agent_number = answered_agent_number[-12:]
-    lead = Lead.get_by_phone_number(caller_id_number, conn)
-    if not lead:
-        lead = Lead.create(name="Incoming Call", phone_number=caller_id_number, conn=conn)
-    lead.assign(agent.id, conn)
-    return f"Assigned {agent.username} to {lead.phone_number}"
-
-
-@app.route("/api/webhook/event/call_missed")
-def call_missed():
-    return "disabled"
-    caller_id_number = request.args.get("caller_id_number", None)
-    if not caller_id_number:
-        return "Invalid data"
-    # get user of that agent
-    # last 12 digits
-    lead = Lead.get_by_phone_number(caller_id_number, conn)
-    if not lead:
-        lead = Lead.create(name="Missed Call", phone_number=caller_id_number, conn=conn, user_id=1)
-    else:
-        return "Lead already exists"
-    return f"Created lead for {lead.phone_number}"
 
 @app.route("/facebook/lead/add")
 def add_facebook_lead():
@@ -681,7 +556,7 @@ def reports():
     for user in users:
         user.leads = user.get_leads(conn)
         user.unaddressed_leads = [lead for lead in user.leads if not lead.follow_ups or not lead.follow_ups[-1].follow_up_time]
-        user.calls = get_call_details(user.phone_number)
+        user.calls = []
         user.outgoing_calls = [call for call in user.calls if "customer" in  call.description]
         user.incoming_calls = [call for call in user.calls if "customer" not in  call.description]
         status_counts = {}
@@ -695,71 +570,6 @@ def reports():
             
         user.status_counts = status_counts
     return render_template("reports/index.html", users=users, statuses=statuses)
-
-@app.route("/api/initiate_call", methods=["POST"])
-def initiate_call():
-    return "disabled"
-    if not tatatelekey:
-        return "No key found"
-    data = request.get_json()
-    agent_number = data.get('agent_number')
-    lead_id = data.get("lead_id")
-    if not agent_number or not lead_id:
-        return "Invalid data"
-    destination_number = Lead.get(int(lead_id), conn).phone_number
-    url = "https://api-smartflo.tatateleservices.com/v1/click_to_call"
-    payload = {
-        "async": 1,
-        "agent_number": agent_number,
-        "destination_number": destination_number,
-        "get_call_id": 1,
-    }
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "Authorization": tatatelekey,
-    }
-
-    response = requests.post(url, json=payload, headers=headers)
-    return response.json()
-
-
-@app.route("/api/dialplan", methods=["GET"])
-def dialplan():
-    return "disabled"
-    caller_id = request.args.get("caller_id_number").strip()
-    #caller_id = request.args.get("caller_id_number").strip()
-    if "+" in caller_id:
-        caller_id = caller_id.replace("+", "")
-    caller_id = str(int(caller_id)) # remove leading zeros
-    if len(caller_id) == 12:
-        caller_id = caller_id[2:]
-    try:
-        response = requests.get("https://monarch.clatos.com/api/tatateleDialPlan?caller_id_number="+caller_id).json()
-        return response # if old system have the response. send the response
-    except requests.exceptions.JSONDecodeError:
-        pass
-
-    with conn:
-        lead = Lead.get_by_phone_number(caller_id, conn)
-        if not lead:
-            return "Failover"
-        agent = User.get(lead.user_id, conn)
-        if not agent:
-            return "Failover"
-        if not agent.phone_number:
-            return "Failover"
-        try:
-            agent.add_notification(f"Call from {lead.name}", f"/lead/{lead.id}", resolved=False, conn=conn)
-        except Exception as e:
-            print(e)
-            pass
-        """
-        if agent.id == 1:
-            return "Failover ADMIN DOESN't TAKE CALLS"
-        """
-        return [{"transfer": {"type": "number", "data": [agent.phone_number]}}]
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host="0.0.0.0")
