@@ -185,7 +185,7 @@ def login():
         given_password = request.form["password"]
         if "@" in given_username:
             compare_against = "email"
-        elif any(char.isdigit() for char in given_username):
+        elif all(char.isdigit() for char in given_username):
             compare_against = "phone_number"
         else:
             compare_against = "username"

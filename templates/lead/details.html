@@ -3,8 +3,6 @@
 {% block title %} Lead Details {% endblock %} 
 
 {% block stylesheets %}
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
   <style>
     .timeline-container {
@@ -155,7 +153,7 @@
                 <label>Address</label>
                 <input type="text" class="form-control" value="{{ lead.address }}" name="address">
               </div>
-              <button class="btn btn-success">Save</button>
+              <button class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i></button>
             </form>
             <button class="btn btn-primary" onclick="call()">📞</button>
             {% if current_user.admin %}
@@ -217,25 +215,7 @@
     var agent_number = "{{ current_user.phone_number }}";
     var lead_id = "{{ lead.id }}";
     function call(){
-      // make a request to /api/initiate_call?agent_number=AGENT_NUMBER&lead_id=LEAD_ID
-      // on success show a toast message
-      // on failure show a toast message
-      fetch(`/api/initiate_call`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ agent_number, lead_id }),
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert("Call initiated successfully");
-          } else {
-            alert("Failed to initiate call");
-          }
-        })
-        .catch(error => console.error("Error:", error));
+      
 
     }
   </script>
