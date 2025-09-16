@@ -45,8 +45,6 @@ class User(UserMixin):
             user = User(*user)
             user.notifications = user.get_notifications(conn)[::-1] # reverse to get latest notification first
             user.unread_count = len([n for n in user.notifications if not n.resolved])
-            for n in user.notifications:
-                print(n.resolved)
             return user
         return None
 
@@ -71,7 +69,6 @@ class User(UserMixin):
             users = cur.fetchall()
             us = []
             for u in users:
-                print(u)
                 us.append(User(*u))
         return us
 
@@ -115,6 +112,6 @@ class User(UserMixin):
     def create(username, password, phone_number, email, position, conn: sqlite3.Connection):
         with conn:
             cur = conn.cursor()
-            cur.execute("INSERT INTO users (username, password, phone_number, email, position) VALUES (?,?,?,?,?, True)", (username, password, phone_number, email, position)) # True for available_for_lead
+            cur.execute("INSERT INTO users (username, password, phone_number, email, position, available_for_lead) VALUES (?,?,?,?,?, True)", (username, password, phone_number, email, position)) # True for available_for_lead
             conn.commit()
         return True

@@ -7,13 +7,10 @@
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
-
   <!-- Font Awesome -->
-  <!-- icheck bootstrap -->
   <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
-
 {% endblock stylesheets %}
 
 {% block content %}
@@ -22,48 +19,12 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-
   <!-- jQuery -->
   <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
   <!-- Bootstrap 4 -->
   <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>
-    const PUBLIC_VAPID_KEY = "BPTBcT6_yjiI5Fb8L-WTd-x7NmAhSxqXV8jBPh0PU7qPak3rib6Ym2IqWhYYRM4w-vBgSxDRTAXaU-WdNr6yMqg";  // Use the public key from Flask
-    let swRegistration = null;
-    async function registerServiceWorker() {
-        if ("serviceWorker" in navigator) {
-            try {
-                const registration = await navigator.serviceWorker.register("/sw.js");
-                console.log("Service Worker Registered:", registration);
-                return registration;
-            } catch (error) {
-                console.error("Service Worker Registration Failed:", error);
-            }
-        }
-    }
-
-    async function subscribeUser() {
-        const applicationServerKey = urlBase64ToUint8Array(PUBLIC_VAPID_KEY);
-        swRegistration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: applicationServerKey
-        })
-        .then(function(subscription) {
-            console.log('User is subscribed.');
-            console.log(subscription)
-            localStorage.setItem('sub_token',JSON.stringify(subscription));
-            isSubscribed = true;
-            $.ajax({
-                type: "POST",
-                url: "/subscribe",
-                contentType: 'application/json; charset=utf-8',
-                dataType:'json',
-                data: JSON.stringify({'sub_token':localStorage.getItem('sub_token')}),
-            }).catch(function(err) {
-                console.log('Failed to subscribe the user: ', err);
-            });
-        })
-    }
+    const PUBLIC_VAPID_KEY = "BGvSnZTJRPGnqgPBarWLcPzWMcyooU_kuwMCxMES3htyhtUKX8-JRCzcvvGIf7uSdATZ_L16snufH2-feTGPidY";  
 
     // Convert VAPID key to Uint8Array
     function urlBase64ToUint8Array(base64String) {
@@ -72,34 +33,82 @@
         const rawData = atob(base64);
         return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
     }
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-        console.log('Service Worker and Push is supported');
 
-        navigator.serviceWorker.register("/sw.js")
-            .then(function(swReg) {
-                console.log('Service Worker is registered', swReg);
-                swRegistration = swReg;
-            })
-            .catch(function(error) {
-                console.error('Service Worker Error', error);
-            });
-    } else {
-        console.warn('Push meapplicationServerPublicKeyssaging is not supported');
+    // Register Service Worker
+    async function registerServiceWorker() {
+        try {
+            const registration = await navigator.serviceWorker.register("/sw.js");
+            console.log("Service Worker registered:", registration);
+            return registration;
+        } catch (error) {
+            console.error("Service Worker registration failed:", error);
+        }
     }
-    // Call the subscribe function when the page loads and then redirect to the home page
-    window.addEventListener("load", async () => {
-        await subscribeUser();
-        //window.location.href = "/";
-    });
 
-    document.getElementById('test').addEventListener('click', async () => {
-        fetch('/send_notification', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+    // Subscribe User
+    async function subscribeUser(registration) {
+        try {
+            const applicationServerKey = urlBase64ToUint8Array(PUBLIC_VAPID_KEY);
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey
+            });
+
+            console.log("User subscribed:", subscription);
+            localStorage.setItem("sub_token", JSON.stringify(subscription));
+
+            await $.ajax({
+                type: "POST",
+                url: "/subscribe",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify({ sub_token: localStorage.getItem("sub_token") }),
+            });
+
+        } catch (err) {
+            if (Notification.permission === "denied") {
+                console.warn("Permission for notifications was denied");
+            } else {
+                console.error("Failed to subscribe user:", err);
+            }
+        }
+    }
+
+    // On page load
+    if ("serviceWorker" in navigator && "PushManager" in window) {
+        window.addEventListener("load", async () => {
+            try {
+                // Request notification permission first
+                const permission = await Notification.requestPermission();
+                if (permission !== "granted") {
+                    console.warn("Notifications not granted by user");
+                    return;
+                }
+
+                // Register service worker
+                const registration = await registerServiceWorker();
+
+                // Wait until it’s ready
+                const readyReg = await navigator.serviceWorker.ready;
+                console.log("Service Worker ready:", readyReg);
+
+                // Subscribe user
+                await subscribeUser(readyReg);
+            } catch (error) {
+                console.error("Setup error:", error);
+            }
+        });
+    } else {
+        console.warn("Push messaging is not supported in this browser.");
+    }
+
+    // Test button
+    document.getElementById("test").addEventListener("click", async () => {
+        await fetch("/send_notification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: "Hello User!" })
         });
     });
-
   </script>
-
 {% endblock javascripts %}

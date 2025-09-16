@@ -8,6 +8,8 @@ from flask_login import (
     current_user,
 )
 import pytz
+import random
+
 import requests
 import sqlite3
 from classes.User import User
@@ -49,8 +51,11 @@ try:
         "Site Visit Pending",
         "Site Visit Done"
     ])
-    push = WebPush(app=app, private_key=config['webpush']['private_key'],
-                   sender_info=config['webpush']['sender_info'])
+    push = WebPush(
+        app=app,
+        private_key=config['webpush']['private_key'],
+        sender_info=config['webpush']['sender_info']
+    )
 except FileNotFoundError:
     config = {}
     with open("config.json", "w+") as f:
@@ -240,6 +245,7 @@ def send_notification():
     subscriptions = [data[2] for data in cur.fetchall()]
     for sub in subscriptions:
         sub = json.loads(sub)
+        print(json.dumps(sub, indent=4))
         try:
             push.send(
                 subscription=sub, 
@@ -340,10 +346,6 @@ def leads():
     leads = current_user.get_leads(conn)
     for lead in leads:
         lead.assigned_to = User.get(lead.user_id, conn).username
-        if not current_user.admin:
-            # censor the phone number
-            #lead.phone_number = censor_phone_number(lead.phone_number)
-            ...
     return render_template("lead/lead.html", leads=leads)
 
 @app.route("/lead/<lead_id>", methods=["POST", "GET"])
@@ -490,7 +492,6 @@ def create_user():
     if not current_user.admin:
         return redirect(url_for("slash"))
     if request.method == "POST":
-        print(request.form)
         username = request.form["name"]
         password = request.form["password"]
         email = request.form["email"]
@@ -573,7 +574,6 @@ def add_facebook_lead():
     if eligible_users:  
         mode = 0 # round robin
         if mode == 0: # random
-            import random
             assignee = random.choice(eligible_users)
         elif mode == 1: # round robin
             # get the last assigned user from the last 100 leads
