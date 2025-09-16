@@ -4,6 +4,7 @@ import sqlite3
 import requests
 from datetime import *
 from discord_webhook import DiscordWebhook, DiscordEmbed
+import sys
 
 from classes.Call import Call
 
@@ -36,4 +37,8 @@ def main():
         sleep(interval)
 
 if __name__ == "__main__":
-    main()	
+    # if "--single" or "-s" in sys.argv, run only once
+    if "--single" in sys.argv or "-s" in sys.argv:
+        take_backup()
+    else:
+        main()
