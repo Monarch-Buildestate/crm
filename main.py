@@ -61,14 +61,14 @@ except FileNotFoundError:
 with conn:
     cur = conn.cursor()
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT, phone_number TEXT, email TEXT, position INTEGER)"
+        "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT, phone_number TEXT, email TEXT, position INTEGER, available_for_lead BOOLEAN DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
     )
     conn.commit()
     # add a user admin if not exists
     cur.execute("SELECT * FROM users WHERE username='admin'")
     if not cur.fetchone():
         cur.execute(
-            "INSERT INTO users (username, password, email, position) VALUES ('admin', 'admin', 'admin@example.com', 1)"
+            "INSERT INTO users (username, password, email, position, available_for_lead) VALUES ('admin', 'admin', 'admin@example.com', 1, FALSE)"
         )
         conn.commit()
     cur.execute(
@@ -518,6 +518,16 @@ def users():
         return redirect(url_for("slash"))
     users = User.get_all(conn)
     return render_template("user/users.html", users=users)
+
+@app.route("/toggle_availability/<user_id>")
+@login_required
+def toggle_availability(user_id):
+    if not current_user.admin:
+        return redirect(url_for("slash"))
+    user = User.get(user_id, conn)
+    user.available_for_lead = not user.available_for_lead
+    user.edit(available_for_lead=user.available_for_lead, conn=conn)
+    return redirect(url_for("users"))
 
 @app.route("/user/<user_id>", methods=["POST", "GET"])
 @login_required

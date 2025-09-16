@@ -24,7 +24,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Leads</h1>
+            <h1>Users</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -42,17 +42,18 @@
         <div class="row">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Leads</h3>
+                <h3 class="card-title">Users</h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <table id="leads" class="table table-bordered table-striped">
+                <table id="users" class="table table-bordered table-striped">
                   <thead>
                     <tr>
                       <th>ID</th>
                       <th>Name</th>
                       <th>Phone</th>
                       <th>Email Address</th>
+                      <th>Available for Lead</th>
                     </tr>
                   </thead>
                   {% for user in users %}
@@ -61,6 +62,11 @@
                         <td><a href="{{ url_for('user', user_id=user.id) }}">{{ user.name }}</td></a>
                         <td>{{ user.phone_number }}</td>
                         <td>{{ user.email }}</td>
+                        {%if user.available_for_lead%}
+                            <td>Yes</td>
+                        {% else %}
+                            <td>No</td>
+                        {% endif %}
                     </tr>
                   {% endfor %}
                 </table>
@@ -97,7 +103,7 @@
   <!-- page script -->
   <script>
     $(function () {
-      $("#leads").DataTable({
+      $("#users").DataTable({
         "order": [[ 4, "desc" ]],
         "pageLength": 50,
         "responsive": true,

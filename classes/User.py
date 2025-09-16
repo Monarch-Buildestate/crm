@@ -7,7 +7,7 @@ import sqlite3
 
 class User(UserMixin):
 
-    def __init__(self, user_id, username, password, phone_number, email, position):
+    def __init__(self, user_id, username, password, phone_number, email, position, available_for_lead, created_at):
         self.id = user_id
         self.username = username
         self.name = username
@@ -16,6 +16,9 @@ class User(UserMixin):
         self.email = email
         self.position = position
         self.admin = True if self.id == 1 else False
+        self.available_for_lead = available_for_lead
+        self.created_at = created_at
+
 
     def get_id(self):
         return self.id
@@ -39,8 +42,7 @@ class User(UserMixin):
             user = cur.fetchone()
             if not user:
                 return None
-            user_id, username, password, phone_number, email, position = user
-            user = User(user_id, username, password, phone_number, email, position)
+            user = User(*user)
             user.notifications = user.get_notifications(conn)[::-1] # reverse to get latest notification first
             user.unread_count = len([n for n in user.notifications if not n.resolved])
             for n in user.notifications:
@@ -69,6 +71,7 @@ class User(UserMixin):
             users = cur.fetchall()
             us = []
             for u in users:
+                print(u)
                 us.append(User(*u))
         return us
 
@@ -78,11 +81,33 @@ class User(UserMixin):
             cur.execute("DELETE FROM users WHERE id=?", (self.id,))
             conn.commit()
         return True
-    
-    def edit(self,username, password, phone_number, email, position, conn: sqlite3.Connection):
+
+    def edit(self,username:str=None, password:str=None, phone_number:str=None, email:str=None, position:int=None, available_for_lead:bool=None, conn: sqlite3.Connection=None):
+        if not conn:
+            raise ValueError("Connection not provided")
+        if username is None:
+            username = self.username
+        if password is None:
+            password = self.password
+        if phone_number is None:
+            phone_number = self.phone_number
+        if email is None:
+            email = self.email
+        if position is None:    
+            position = self.position
+        if available_for_lead is None:
+            available_for_lead = self.available_for_lead
+        
         with conn:
             cur = conn.cursor()
-            cur.execute("UPDATE users SET username=?, password=?, phone_number=?, email=?, position=? WHERE id=?", (username, password, phone_number, email, position, self.id))
+            cur.execute("UPDATE users SET username=?, password=?, phone_number=?, email=?, position=?, available_for_lead=? WHERE id=?", (username, password, phone_number, email, position, available_for_lead, self.id))
+            self.username = username
+            self.name = username
+            self.password = password
+            self.phone_number = phone_number
+            self.email = email
+            self.position = position
+            self.available_for_lead = available_for_lead
             conn.commit()
         return True
         
@@ -90,6 +115,6 @@ class User(UserMixin):
     def create(username, password, phone_number, email, position, conn: sqlite3.Connection):
         with conn:
             cur = conn.cursor()
-            cur.execute("INSERT INTO users (username, password, phone_number, email, position) VALUES (?,?,?,?,?)", (username, password, phone_number, email, position))
+            cur.execute("INSERT INTO users (username, password, phone_number, email, position) VALUES (?,?,?,?,?, True)", (username, password, phone_number, email, position)) # True for available_for_lead
             conn.commit()
         return True

@@ -53,6 +53,11 @@
                   <button type="submit" class="btn btn-success">Save</button>
                 </div>
               </form>
+              <div class="card-body">
+                <h5>Available for Lead: {% if user.available_for_lead %} Yes {% else %} No {% endif %}</h5>
+                <a href="{{ url_for('toggle_availability', user_id=user.id) }}" class="btn btn-primary">
+                  {% if user.available_for_lead %} Set as Not Available {% else %} Set as Available {% endif %}
+                </a>
               <a href="{{url_for('delete_user', user_id=user.id)}}" class="btn btn-danger">Delete</a>
             </div>
           </div>
