@@ -23,7 +23,9 @@ import typing
 from datetime import datetime
 import os
 import json
-
+if "database.db" not in os.listdir():
+    open("database.db", "w+").close()
+    
 conn = sqlite3.connect("database.db", check_same_thread=False)
 
 login_manager = LoginManager()
