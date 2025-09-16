@@ -567,7 +567,38 @@ def add_facebook_lead():
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
     
-    Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=city)
+    new_lead = Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=city)
+    users = User.get_all(conn)
+    eligible_users = [user for user in users if user.available_for_lead and user.position > 1]
+    if eligible_users:  
+        mode = 0 # round robin
+        if mode == 0: # random
+            import random
+            assignee = random.choice(eligible_users)
+        elif mode == 1: # round robin
+            # get the last assigned user from the last 100 leads
+            cur.execute("SELECT user_id FROM lead ORDER BY id DESC LIMIT 100")
+            last_100_leads = [row[0] for row in cur.fetchall()]
+            last_assigned_user_id = None
+            for uid in last_100_leads:
+                if uid in [user.id for user in eligible_users]:
+                    last_assigned_user_id = uid
+                    break
+            if last_assigned_user_id:
+                last_index = [i for i, user in enumerate(eligible_users) if user.id == last_assigned_user_id][0]
+                assignee = eligible_users[(last_index + 1) % len(eligible_users)]
+            else:
+                assignee = eligible_users[0]
+        elif mode == 2: # guy with least leads
+            user_lead_counts = {user.id: 0 for user in eligible_users}
+            cur.execute("SELECT user_id, COUNT(*) FROM lead GROUP BY user_id")
+            for row in cur.fetchall():
+                if row[0] in user_lead_counts:
+                    user_lead_counts[row[0]] = row[1]
+            assignee = min(eligible_users, key=lambda u: user_lead_counts[u.id])
+        new_lead.assign(assignee.id, conn)
+
+        # make logic here to assign
     return "Lead added"
 
 @app.route("/reports")
