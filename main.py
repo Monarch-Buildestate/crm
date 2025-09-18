@@ -350,21 +350,10 @@ def leads():
         lead.assigned_to = User.get(lead.user_id, conn).username
     return render_template("lead/lead.html", leads=leads)
 
-@app.route("/lead/<lead_id>", methods=["POST", "GET"])
+
+@app.route("/lead/<lead_id>", methods=["GET"])
 @login_required
 def lead(lead_id: int = None):
-    if request.method == "POST":
-        new_name = request.form["name"]
-        """
-        new_phone_number = request.form["number"]
-        if len(new_phone_number) == 10:
-            new_phone_number = "91" + new_phone_number"""  # phone number is not editable
-        new_email = request.form["email"]
-        new_address = request.form["address"]
-        lead = Lead.get(lead_id, conn)
-        lead.update_details(name=new_name, phone_number=lead.phone_number, email=new_email, address=new_address, conn=conn)
-        return redirect(url_for("lead", lead_id=lead_id))
-    
     lead = Lead.get(lead_id, conn)
     if not lead:
         return redirect(url_for("leads"))
@@ -393,6 +382,27 @@ def lead(lead_id: int = None):
         current_time=datetime.now(tz=pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%dT%H:%M"),
         lead_status=statuses_for_lead
     )
+@app.route("/lead/<lead_id>/edit", methods=["POST"])
+@login_required
+def edit_lead(lead_id):
+    lead = Lead.get(lead_id, conn)
+    if not lead:
+        return redirect(url_for("leads"))   
+    field = request.args.get("field")
+    if field not in ["name", "phone_number", "email", "address"]:
+        return redirect(url_for("lead", lead_id=lead_id))   
+    new_value = request.form.get("new_value")
+    if field == "phone_number":
+        if len(new_value) == 10:
+            new_value = "91" + new_value
+        lead.update_details(phone_number=new_value, conn=conn)
+    elif field == "name":
+        lead.update_details(name=new_value, conn=conn)
+    elif field == "email":
+        lead.update_details(email=new_value, conn=conn)
+    elif field == "address":
+        lead.update_details(address=new_value, conn=conn)
+    return redirect(url_for("lead", lead_id=lead_id))
 
 @app.route("/lead/<lead_id>/delete")
 @login_required
