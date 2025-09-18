@@ -176,6 +176,14 @@ class Lead:
         }
 
     def update_details(self, name=None, phone_number=None, email=None, address=None, conn: sqlite3.Connection = None):
+        if not name:
+            name = self.name
+        if not phone_number:
+            phone_number = self.phone_number    
+        if not email:
+            email = self.email
+        if not address:
+            address = self.address
         with conn:
             cur = conn.cursor()
             cur.execute(

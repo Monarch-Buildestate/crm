@@ -29,6 +29,10 @@
       border-radius: 5px;
       box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
     }
+    .editable-icon {
+      cursor: pointer;
+      margin-left: 8px;
+    }
     @media (max-width: 768px) {
       .timeline-container {
         flex-direction: column;
@@ -37,7 +41,6 @@
         order: -1; /* Moves lead details to the top */
       }
     }
-
   </style>
 {% endblock stylesheets %}
 
@@ -63,6 +66,36 @@
       <div class="container-fluid">
         <div class="timeline-container">
           <div class="timeline-box">
+            <div class="follow-up-form">
+              <h4>Add a Follow-Up</h4>
+              <form action="/lead/{{ lead.id }}/followup" method="POST">
+                <div class="form-group">
+                  <label>Follow Up?</label>
+                  <select class="form-control" id="follow-up-select" name="follow-up-select" onchange="toggleFollowUpDate()">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div class="form-group" id="follow-up-date">
+                  <label>Follow-Up Time</label>
+                  <input type="datetime-local" class="form-control" name="follow-up-time" id="follow-up-time">
+                </div>
+                <div class="form-group">
+                  <label>Remarks</label>
+                  <textarea class="form-control" id="follow-up-remarks" name="remarks" placeholder="Enter follow-up remarks..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Lead Status</label>
+                  <select class="form-control" name="status" id="status">
+                    {% for status in lead_status %}
+                      <option value="{{ status }}">{{ status }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <button class="btn btn-primary">Add Follow-Up</button>
+              </form>
+            </div>
+            <h4>Comments & Activities</h4>
             <form action="/lead/{{ lead.id }}/comment" method="POST">
               <div class="form-group">
                 <div class="comment-box">
@@ -95,7 +128,6 @@
                             <a href="/lead/{{ lead.id }}/followup/{{ event['id'] }}/delete" class="btn btn-danger">Delete</a>
                           {% endif %}
                         {% endif %}
-
                       </h3>
                       <div class="timeline-body">
                         {% if 'comment' in event %}
@@ -110,7 +142,7 @@
                           {% endif %}
                         {% else %}
                           {% if event['follow_up_time'] %}
-                            <b>{{ event['remarks'] }}</b> <br>Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }} 
+                            <b>Remarks- {%if event['remarks']%}{{ event['remarks'] }}{%else%}No Remarks{%endif%}</b> <br>Follow-up scheduled for {{ event['follow_up_time'].strftime('%d %b %Y %H:%M') }} 
                           {% else %}
                             {{ event['remarks'] }}
                           {% endif %}
@@ -123,6 +155,7 @@
               {% endfor %}
             </div>
           </div>
+
           <div class="lead-details">
             <form action="/lead/{{ lead.id }}/assign" method="POST">
               <label>Assign To</label>
@@ -136,59 +169,44 @@
             <h3>Lead Details ({{lead.id}})</h3>
             <h2>Lead For: {{lead.assigned_to}}</h2>
             <h2>Lead Status: {{lead.status}}</h2>
-            <form action="/lead/{{ lead.id }}" method="POST">
-              <div class="form-group">
-                <label>Name</label>
-                <input type="text" class="form-control" value="{{ lead.name }}" name="name">
-              </div>
-              <div class="form-group">
-                <label>Phone Number</label>
-                {{ lead.phone_number }}
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" class="form-control" value="{{ lead.email }}" name="email">
-              </div>
-              <div class="form-group">
-                <label>Address</label>
-                <input type="text" class="form-control" value="{{ lead.address }}" name="address">
-              </div>
-              <button class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i></button>
-            </form>
-            <a href="tel:{{ lead.phone_number }}"><button class="btn btn-primary"><i class="fa-solid fa-phone"></i></button></a>
-            <a href="https://wa.me/{{ lead.phone_number }}"><button class="btn btn-primary"><i class="fa-brands fa-whatsapp"></i></button></a>
+
+            <div class="form-group">
+              <label>Name</label>
+              <span id="name-container">
+                <span id="name-display">{{ lead.name }}</span>
+                <i class="fa-solid fa-pen-to-square editable-icon text-primary" onclick="editField('name')"></i>
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label>Phone Number</label>
+              <span id="phone_number-container">
+                <span id="phone_number-display">{{ lead.phone_number }}</span>
+                <i class="fa-solid fa-pen-to-square editable-icon text-primary" onclick="editField('phone_number')"></i>
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label>Email</label>
+              <span id="email-container">
+                <span id="email-display">{{ lead.email }}</span>
+                <i class="fa-solid fa-pen-to-square editable-icon text-primary" onclick="editField('email')"></i>
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label>Address</label>
+              <span id="address-container">
+                <span id="address-display">{{ lead.address }}</span>
+                <i class="fa-solid fa-pen-to-square editable-icon text-primary" onclick="editField('address')"></i>
+              </span>
+            </div>
+
+            <a href="tel:{{ lead.phone_number }}" id="lead-call-button"><button class="btn btn-primary"><i class="fa-solid fa-phone"></i></button></a>
+            <a href="https://wa.me/{{ lead.phone_number }}" id="lead-whatsapp-button"><button class="btn btn-primary"><i class="fa-brands fa-whatsapp"></i></button></a>
             {% if current_user.admin %}
               <a href="/lead/{{ lead.id }}/delete" onclick="return confirm('Are you sure?')" class="btn btn-danger">Delete</a>
             {% endif %}
-            <div class="follow-up-form">
-              <h4>Add a Follow-Up</h4>
-              <form action="/lead/{{ lead.id }}/followup" method="POST">
-                <div class="form-group">
-                  <label>Follow Up?</label>
-                  <select class="form-control" id="follow-up-select" name="follow-up-select" onchange="toggleFollowUpDate()">
-                    <option value="no">No</option>
-                    <option value="yes">Yes</option>
-                  </select>
-                </div>
-                <div class="form-group" id="follow-up-date">
-                  <label>Follow-Up Time</label>
-                  <input type="datetime-local" class="form-control" name="follow-up-time" id="follow-up-time">
-                </div>
-                <div class="form-group">
-                  <label>Remarks</label>
-                  <textarea class="form-control" id="follow-up-remarks" name="remarks" placeholder="Enter follow-up remarks..."></textarea>
-                </div>
-                <div class="form-group">
-                  <label>Lead Status</label>
-                  <select class="form-control" name="status" id="status">
-                    {% for status in lead_status %}
-                      <option value="{{ status }}">{{ status }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <button class="btn btn-primary">Add Follow-Up</button>
-              </form>
-            </div>
           </div>
         </div>
       </div>
@@ -205,19 +223,65 @@
       var followUpSelect = document.getElementById("follow-up-select");
       var followUpDate = document.getElementById("follow-up-date");
       followUpDate.style.display = followUpSelect.value === "yes" ? "block" : "none";
-      // make the follow-up date required if follow-up is selected
       document.getElementById("follow-up-time").required = followUpSelect.value === "yes";
     }
     toggleFollowUpDate();
+
     document.addEventListener('DOMContentLoaded', function() {
       var calender = document.getElementById("follow-up-time");
       calender.min = new Date().toISOString().slice(0,new Date().toISOString().lastIndexOf(":"));
     });
-    var agent_number = "{{ current_user.phone_number }}";
-    var lead_id = "{{ lead.id }}";
-    function call(){
-      
 
+    // Inline editing logic
+    function editField(field) {
+        const container = document.getElementById(field + "-container");
+        const currentValue = document.getElementById(field + "-display").innerText;
+
+        container.innerHTML = `
+          <input type="text" id="${field}-input" value="${currentValue}" class="form-control d-inline" style="width:70%; display:inline-block;">
+          <i class="fa-solid fa-floppy-disk text-success ml-2" style="cursor:pointer;" onclick="saveField('${field}')"></i>
+          <i class="fa-solid fa-xmark text-danger ml-2" style="cursor:pointer;" onclick="cancelField('${field}', '${currentValue}')"></i>
+        `;
+      }
+
+
+    function saveField(field) {
+      const newValue = document.getElementById(field + "-input").value;
+      const leadId = "{{ lead.id }}";
+
+      fetch(`/lead/${leadId}/edit?field=${field}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ new_value: newValue })
+      })
+      .then(response => {
+        if (response.ok) {
+          document.getElementById(field + "-container").innerHTML = `
+            <span id="${field}-display">${newValue}</span>
+            <i class="fa-solid fa-pen-to-square editable-icon text-primary" onclick="editField('${field}')"></i>
+          `;
+
+          // Extra logic for phone_number
+          if (field === "phone_number") {
+            document.getElementById("lead-call-button").setAttribute("href", "tel:" + newValue);
+            document.getElementById("lead-whatsapp-button").setAttribute("href", "https://wa.me/" + newValue);
+          }
+        } else {
+          alert("Failed to update " + field);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error updating " + field);
+      });
+    }
+
+
+    function cancelField(field, originalValue) {
+      document.getElementById(field + "-container").innerHTML = `
+        <span id="${field}-display">${originalValue}</span>
+        <i class="fa-solid fa-pen-to-square editable-icon text-primary" onclick="editField('${field}')"></i>
+      `;
     }
   </script>
 {% endblock javascripts %}
