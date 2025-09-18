@@ -348,8 +348,25 @@ def leads():
     leads = current_user.get_leads(conn)
     for lead in leads:
         lead.assigned_to = User.get(lead.user_id, conn).username
-    return render_template("lead/lead.html", leads=leads)
+    all_users = User.get_all(conn)
+    print(len(all_users))
+    return render_template("lead/lead.html", leads=leads, all_users=all_users)
 
+@app.route("/leads/bulk/assign/<user_id>/<lead_ids>", methods=["POST"])
+@login_required
+def bulk_assign(user_id, lead_ids):
+    if not current_user.admin:
+        return redirect(url_for("leads"))
+    lead_ids = lead_ids.split(" ")
+    user_id = int(user_id)
+    user = User.get(user_id, conn)
+    if not user:
+        return redirect(url_for("leads"))
+    for lead_id in lead_ids:
+        lead = Lead.get(lead_id, conn)
+        if lead:
+            lead.assign(user_id, conn)
+    return "ok", 200
 
 @app.route("/lead/<lead_id>", methods=["GET"])
 @login_required

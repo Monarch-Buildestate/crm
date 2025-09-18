@@ -2,121 +2,172 @@
 
 {% block title %} Tables Data {% endblock %} 
 
-<!-- Element injected in the BODY element -->
-{% block body_class %} {% endblock body_class %} 
-
-<!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
-  <!-- Font Awesome -->
-  <!-- DataTables -->
   <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-  <!-- Theme style -->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
-
 {% endblock stylesheets %}
 
 {% block content %} 
-
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1>Leads</h1>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Leads</li>
-            </ol>
-          </div>
+<div class="content-wrapper">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Leads</h1>
         </div>
-      </div><!-- /.container-fluid -->
-    </section>
-
-    <!-- Main content -->
-    <section class="content">
-      <div class="container-fluid">
-        <div class="row">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Leads</h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <table id="leads" class="table table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Nex Follow Up</th>
-                      <th>Phone</th>
-                      <th>Created At</th>
-                      <th>Updated At</th>
-                      <th>Email</th>
-                      <th>Assigned To</th>
-                      <th>Lead Status</th>
-                      <th>Address</th>
-                    </tr>
-                  </thead>
-                  {% for lead in leads %}
-                    <tr>
-                        <td>{{ lead.id }}</td>
-                        <td><a href="{{ url_for('lead', lead_id=lead.id) }}">{{ lead.name }}</td></a>
-                        <td>{{ lead.next_follow_up_time }}</td>
-                        <td>{{ lead.phone_number }}</td>
-                        <td>{{ lead.created_at }}</td>
-                        <td>{{ lead.last_follow_up_time }}</td>
-                        <td>{{ lead.email }}</td>
-                        <td>{{ lead.assigned_to }}</td>
-                        <td>{{ lead.status }}</td>
-                        <td>{{ lead.address }}</td>
-                    </tr>
-                  {% endfor %}
-                </table>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </div>
-          <!-- /.col -->
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active">Leads</li>
+          </ol>
         </div>
-        <!-- /.row -->
       </div>
-      <!-- /.container-fluid -->
-    </section>
-    <!-- /.content -->
-  </div>
+    </div>
+  </section>
 
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="card w-100">
+          <div class="card-header d-flex align-items-center">
+            <h3 class="card-title">Leads</h3>
+            {% if current_user.admin %}
+            <div class="dropdown ml-3">
+              <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="bulkDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Bulk Actions
+              </button>
+              <div class="dropdown-menu" aria-labelledby="bulkDropdown">
+                <div class="dropdown-submenu">
+                  <a class="dropdown-item dropdown-toggle" href="#">Bulk Assign</a>
+                  <div class="dropdown-menu">
+                    {% for user in all_users %}
+                    <a class="dropdown-item bulk-assign-user" data-user="{{ user.id }}" href="#">
+                      ({{ user.id }}) {{ user.name }}
+                    </a>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+          <div class="card-body">
+            <table id="leads" class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  {% if current_user.admin %}
+                  <th><input type="checkbox" id="select-all"></th>
+                  {% endif %}
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Next Follow Up</th>
+                  <th>Phone</th>
+                  <th>Created At</th>
+                  <th>Updated At</th>
+                  <th>Email</th>
+                  <th>Assigned To</th>
+                  <th>Lead Status</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              {% for lead in leads %}
+              <tr>
+                {% if current_user.admin %}
+                <td><input type="checkbox" class="lead-select" value="{{ lead.id }}"></td>
+                {% endif %}
+                <td>{{ lead.id }}</td>
+                <td><a href="{{ url_for('lead', lead_id=lead.id) }}">{{ lead.name }}</a></td>
+                <td>{{ lead.next_follow_up_time }}</td>
+                <td>{{ lead.phone_number }}</td>
+                <td>{{ lead.created_at }}</td>
+                <td>{{ lead.last_follow_up_time }}</td>
+                <td>{{ lead.email }}</td>
+                <td>{{ lead.assigned_to }}</td>
+                <td>{{ lead.status }}</td>
+                <td>{{ lead.address }}</td>
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-
-  <!-- jQuery -->
   <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
   <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- DataTables -->
   <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
   <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
   <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
   <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-  <!-- AdminLTE App -->
   <script src="/static/assets/js/adminlte.min.js"></script>
-  <!-- page script -->
+
   <script>
+    // Enable hover/click for submenu
+    $('.dropdown-submenu .dropdown-toggle').on("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $(this).next('.dropdown-menu').toggle();
+    });
+
     $(function () {
       $("#leads").DataTable({
-        "order": [[ 4, "desc" ]],
+        "order": [[ 5, "desc" ]],
         "pageLength": 50,
         "responsive": true,
         "autoWidth": true,
       });
+
+      {% if current_user.admin %}
+      // Select/Deselect All
+      $("#select-all").on("click", function() {
+        $(".lead-select").prop("checked", this.checked);
+      });
+
+      // Bulk Assign per user
+      $(".bulk-assign-user").on("click", function(e) {
+        e.preventDefault();
+        let userId = $(this).data("user");
+        let selected = $(".lead-select:checked").map(function() { return this.value; }).get();
+
+        if (selected.length === 0) {
+          alert("No leads selected");
+          return;
+        }
+
+        let url = "/leads/bulk/assign/" + userId + "/" + selected.join("%20");
+        $.ajax({
+          url: url,
+          method: "POST",
+          success: function() {
+            alert("Bulk assign successful REFRESHING");
+            location.reload();
+          },
+          error: function() {
+            alert("Bulk assign failed");
+          }
+        });
+      });
+      {% endif %}
     });
   </script>
 
+  <style>
+    /* Support nested submenu */
+    .dropdown-submenu {
+      position: relative;
+    }
+    .dropdown-submenu > .dropdown-menu {
+      top: 0;
+      left: 100%;
+      margin-left: 0.1rem;
+      margin-right: 0.1rem;
+    }
+    
+  </style>
 {% endblock javascripts %}
