@@ -154,10 +154,9 @@
                 <input type="text" class="form-control" value="{{ lead.address }}" name="address">
               </div>
               <button class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i></button>
-              <a href="tel:{{ lead.phone_number }}"><button class="btn btn-primary"><i class="fa-solid fa-phone"></i></button></a>
-              <a href="https://wa.me/{{ lead.phone_number }}"><button class="btn btn-primary"><i class="fa-brands fa-whatsapp"></i></button></a>
             </form>
-
+            <a href="tel:{{ lead.phone_number }}"><button class="btn btn-primary"><i class="fa-solid fa-phone"></i></button></a>
+            <a href="https://wa.me/{{ lead.phone_number }}"><button class="btn btn-primary"><i class="fa-brands fa-whatsapp"></i></button></a>
             {% if current_user.admin %}
               <a href="/lead/{{ lead.id }}/delete" onclick="return confirm('Are you sure?')" class="btn btn-danger">Delete</a>
             {% endif %}
