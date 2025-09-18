@@ -311,6 +311,14 @@ def slash():
         leads_addressed_today=leads_addressed_today,
         calls_made_today=calls_made_today,
     )
+@app.route("/resolve_all", methods=["GET"])
+def resolve_all():
+    with conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE notifications SET resolved=1 WHERE resolved=0 AND user_id=?", (current_user.id,))
+        conn.commit()
+    return "Done"
+
 
 @app.route("/resolve/<notification_id>", methods=["GET"])
 def resolve(notification_id:int=None):
@@ -318,7 +326,7 @@ def resolve(notification_id:int=None):
         return redirect(url_for("slash"))
     with conn:
         cur = conn.cursor()
-        cur.execute("UPDATE notifications SET resolved=1 WHERE id=?", (notification_id,))
+        cur.execute("UPDATE notifications SET resolved=1 WHERE id=? AND user_id=?", (notification_id, current_user.id))
         conn.commit()
     return "Done"
 def create_timeline(lead: Lead):

@@ -30,15 +30,29 @@
           <span class="badge badge-warning navbar-badge">{{current_user.unread_count}}</span>
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">{{current_user.unread_count}} Notifications</span>
+          <span class="dropdown-item dropdown-header">{{current_user.unread_count}} Notifications</span> 
+          <div class="dropdown-divider"></div>
+          <a href="#" onclick="resolve_all()" class="dropdown-item">
+            <i class="fas fa-check mr-2"></i> Mark all as read
+          </a>
           {% for notification in current_user.notifications %}
           <div class="dropdown-divider"></div>
           <a href="{{notification.href}}" onclick="resolve({{notification.id}})" class="dropdown-item {% if notification.resolved %}bg-light{% endif %}">
             {% if "lead" in notification.href %}
+            {% if notification.resolved %}
+            <!-- opened envelope and a bit dark bg-->
+            <i class="fas fa-envelope-open-text mr-2"></i> {{notification.content}}
+            {% else %}
+            <!-- closed envelope -->
             <i class="fas fa-envelope mr-2"></i> {{notification.content}}
+            {% endif %}
             {% else %}
             <!--its a call-->
+            {% if notification.resolved %}  
+            <i class="fas fa-phone-alt mr-2"></i> {{notification.content}}
+            {% else %}
             <i class="fas fa-phone mr-2"></i> {{notification.content}}
+            {% endif %}
             {% endif %}
           </a>
           {% endfor %}
@@ -65,5 +79,14 @@
   <script>
     function resolve(id){
       fetch(`/resolve/${id}`)
+    }
+    function resolve_all(){
+      fetch('/resolve_all')
+      .then(response => {
+        if(response.ok){
+          location.reload();
+        }
+      })
+
     }
   </script>
