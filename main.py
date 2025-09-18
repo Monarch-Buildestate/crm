@@ -388,6 +388,9 @@ def edit_lead(lead_id):
     lead = Lead.get(lead_id, conn)
     if not lead:
         return redirect(url_for("leads"))   
+    if not current_user.admin and lead.user_id != current_user.id:
+        # don't allow access to other user's leads if not admin
+        return redirect(url_for("leads"))
     field = request.args.get("field")
     if field not in ["name", "phone_number", "email", "address"]:
         return redirect(url_for("lead", lead_id=lead_id))   
@@ -496,8 +499,6 @@ def create_lead():
         return redirect(url_for("lead", lead_id=lead.id))
     return render_template("lead/create.html")
 
-
-
 @app.route("/user/create", methods=["POST", "GET"]) 
 @login_required
 def create_user():
@@ -517,7 +518,6 @@ def create_user():
 def delete_user(user_id):
     if not current_user.admin:
         return
-    return "DISABLED"
     leads = current_user.get_leads(conn)
     for lead in leads:
         lead.assign(1, conn)
