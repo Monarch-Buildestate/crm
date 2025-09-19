@@ -2,31 +2,24 @@
 
 {% block title %} Subscribe {% endblock %} 
 
-<!-- Element injected in the BODY element -->
 {% block body_class %} login-page {% endblock body_class %}
 
-<!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- Theme style -->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
 {% endblock stylesheets %}
 
 {% block content %}
+<button id="subscribeBtn">Enable Notifications</button>
 <button id="test">TEST</button>
 {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-  <!-- jQuery -->
   <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
   <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>
     const PUBLIC_VAPID_KEY = "BGvSnZTJRPGnqgPBarWLcPzWMcyooU_kuwMCxMES3htyhtUKX8-JRCzcvvGIf7uSdATZ_L16snufH2-feTGPidY";  
 
-    // Convert VAPID key to Uint8Array
     function urlBase64ToUint8Array(base64String) {
         const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
         const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
@@ -34,7 +27,6 @@
         return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
     }
 
-    // Register Service Worker
     async function registerServiceWorker() {
         try {
             const registration = await navigator.serviceWorker.register("/sw.js");
@@ -42,10 +34,10 @@
             return registration;
         } catch (error) {
             console.error("Service Worker registration failed:", error);
+            throw error;
         }
     }
 
-    // Subscribe User
     async function subscribeUser(registration) {
         try {
             const applicationServerKey = urlBase64ToUint8Array(PUBLIC_VAPID_KEY);
@@ -74,33 +66,31 @@
         }
     }
 
-    // On page load
-    if ("serviceWorker" in navigator && "PushManager" in window) {
-        window.addEventListener("load", async () => {
-            try {
-                // Request notification permission first
-                const permission = await Notification.requestPermission();
-                if (permission !== "granted") {
-                    console.warn("Notifications not granted by user");
-                    return;
-                }
-
-                // Register service worker
-                const registration = await registerServiceWorker();
-
-                // Wait until it’s ready
-                const readyReg = await navigator.serviceWorker.ready;
-                console.log("Service Worker ready:", readyReg);
-
-                // Subscribe user
-                await subscribeUser(readyReg);
-            } catch (error) {
-                console.error("Setup error:", error);
-            }
-        });
-    } else {
-        console.warn("Push messaging is not supported in this browser.");
+    // Check support before anything else
+    if (!("serviceWorker" in navigator && "PushManager" in window)) {
+        alert("Your browser does not support notifications.");
+        window.location.href = "/";
     }
+
+    // User-triggered subscription flow
+    document.getElementById("subscribeBtn").addEventListener("click", async () => {
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") {
+                alert("You must allow notifications to subscribe.");
+                return;
+            }
+
+            const registration = await registerServiceWorker();
+            const readyReg = await navigator.serviceWorker.ready;
+            console.log("Service Worker ready:", readyReg);
+
+            await subscribeUser(readyReg);
+            alert("Subscribed successfully!");
+        } catch (error) {
+            console.error("Setup error:", error);
+        }
+    });
 
     // Test button
     document.getElementById("test").addEventListener("click", async () => {
