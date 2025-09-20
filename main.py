@@ -246,6 +246,7 @@ def send_notification():
         }
 
         response = requests.post(url, headers=headers, json=payload)
+        print(response.status_code, response.text)
 
 
         return redirect(url_for("send_notification"))
