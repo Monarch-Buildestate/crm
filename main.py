@@ -338,7 +338,7 @@ def assign_lead(lead_id):
     lead = Lead.get(lead_id, conn)
     lead.assign(new_user_id, conn)
     
-    post_notification(user, "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
+    post_notification(user, "Lead Assigned", f"You have been assigned a new lead: {lead.name} ({lead.id})", f"/lead/{lead.id}")
     return redirect(url_for("lead", lead_id=lead_id))
 
 
@@ -366,7 +366,7 @@ def bulk_assign(user_id, lead_ids):
         lead = Lead.get(lead_id, conn)
         if lead:
             lead.assign(user_id, conn)
-            post_notification(user, "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
+            post_notification(user, "Lead Assigned", f"You have been assigned a new lead: {lead.name} ({lead.id})", f"/lead/{lead.id}")
     return "ok", 200
 
 @app.route("/lead/<lead_id>", methods=["GET"])
@@ -459,8 +459,15 @@ def pending_leads():
 @app.route("/lead/<lead_id>/comment", methods=["POST"])
 @login_required
 def comment(lead_id):
+    lead = Lead.get(lead_id, conn)
+    if not lead:
+        return "Lead not found"
     comment = request.form["comment"]
     Comment.create(comment, current_user.id, lead_id, conn)
+    if current_user.id != Lead.get(lead_id, conn).user_id:
+        lead = Lead.get(lead_id, conn)
+        lead_owner = User.get(lead.user_id, conn)
+        post_notification(lead_owner, "New Comment", f"{current_user.username} commented on lead {lead.name} ({lead.id})", f"/lead/{lead.id}")
     return redirect(url_for("lead", lead_id=lead_id))
 
 @app.route("/lead/<lead_id>/comment/<comment_id>/delete")
@@ -490,6 +497,9 @@ def followup(lead_id):
     FollowUp.create(
         current_user.id, lead_id, follow_up_time, follow_up_user_id, remarks, status=status, conn=conn
     )
+    if follow_up_user_id != current_user.id:
+        follow_up_user = User.get(follow_up_user_id, conn)
+        post_notification(follow_up_user, "New Follow Up", f"{current_user.username} added a follow up for lead {lead.name} ({lead.id})", f"/lead/{lead.id}")
     return redirect(url_for("lead", lead_id=lead_id))
 
 @app.route("/lead/<lead_id>/followup/<followup_id>/delete")
