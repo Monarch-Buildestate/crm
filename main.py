@@ -252,15 +252,7 @@ def send_notification():
         return redirect(url_for("send_notification"))
 
     # Show a simple form to send notifications
-    return """
-        <form method="POST">
-            <label>Title:</label><br>
-            <input type="text" name="title" placeholder="Enter title"><br><br>
-            <label>Message:</label><br>
-            <textarea name="message" placeholder="Enter message"></textarea><br><br>
-            <button type="submit">Send Notification</button>
-        </form>
-    """
+    return render_template("home/subscribe.html")
 
 @app.route("/logout")
 @login_required

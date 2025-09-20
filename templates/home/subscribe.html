@@ -1,0 +1,25 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %} Subscribe {% endblock %} 
+
+{% block body_class %} login-page {% endblock body_class %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+{% endblock stylesheets %}
+
+{% block content %}
+        <form method="POST">
+            <label>Title:</label><br>
+            <input type="text" name="title" placeholder="Enter title"><br><br>
+            <label>Message:</label><br>
+            <textarea name="message" placeholder="Enter message"></textarea><br><br>
+            <button type="submit">Send Notification</button>
+        </form>
+{% endblock content %}
+
+{% block javascripts %}
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+{% endblock javascripts %}
