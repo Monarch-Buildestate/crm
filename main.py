@@ -9,7 +9,6 @@ from flask_login import (
 )
 import pytz
 import random
-
 import requests
 import sqlite3
 from classes.User import User
@@ -17,7 +16,6 @@ from classes.Lead import Lead
 from classes.Comment import Comment
 from classes.FollowUp import FollowUp
 from classes.Call import Call
-from flask_pywebpush import WebPush, WebPushException
 
 import typing
 from datetime import datetime
@@ -53,17 +51,16 @@ try:
         "Site Visit Pending",
         "Site Visit Done"
     ])
-    push = WebPush(
-        app=app,
-        private_key=config['webpush']['private_key'],
-        sender_info=config['webpush']['sender_info']
-    )
+    ONESIGNAL_APP_ID = config.get("onesignal", {}).get("app_id", None)
+    ONESIGNAL_API_KEY = config.get("onesignal", {}).get("api_key", None)
 except FileNotFoundError:
     config = {}
     with open("config.json", "w+") as f:
         json.dump(config, f, indent=4)
     tatatelekey = None
-    push = None
+    ONESIGNAL_APP_ID = None
+    ONESIGNAL_API_KEY = None
+
 
 with conn:
     cur = conn.cursor()
@@ -228,25 +225,41 @@ def onesignal_sdk_worker():
     return send_file("static/assets/js/OneSignalSDKWorker.js", mimetype="application/javascript")
     
 @app.route("/send_notification", methods=["GET", "POST"])
+@login_required 
 def send_notification():
-    return "disabled"
-    """Send a push notification to Current user as test."""
-    data = request.json
-    message = data.get("message", "Default Notification")
+    if not ONESIGNAL_APP_ID or not ONESIGNAL_API_KEY:
+        return "OneSignal not configured. Please set ONESIGNAL_APP_ID and ONESIGNAL_API_KEY in config.json"
+    if request.method == "POST":
+        title = request.form.get("title", "Default Title")
+        message = request.form.get("message", "Default Message")
 
-    cur.execute("SELECT * FROM subscriptions WHERE user_id=?", (current_user.id,))
-    subscriptions = [data[2] for data in cur.fetchall()]
-    for sub in subscriptions:
-        sub = json.loads(sub)
-        print(json.dumps(sub, indent=4))
-        try:
-            push.send(
-                subscription=sub, 
-                notification={'title':'test test test test', 'body': 'test body', 'href':"/lead/1"})
-        except WebPushException as ex:
-            return f"Web Push failed: {ex}"
+        url = "https://onesignal.com/api/v1/notifications"
+        headers = {
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": f"Basic {ONESIGNAL_API_KEY}"
+        }
+        payload = {
+            "app_id": ONESIGNAL_APP_ID,
+            "include_external_user_ids": [str(current_user.id)],  # target logged-in user
+            "headings": {"en": title},
+            "contents": {"en": message}
+        }
 
-    return jsonify({"message": "Notification sent"}), 200
+        response = requests.post(url, headers=headers, json=payload)
+
+
+        return redirect(url_for("send_notification"))
+
+    # Show a simple form to send notifications
+    return """
+        <form method="POST">
+            <label>Title:</label><br>
+            <input type="text" name="title" placeholder="Enter title"><br><br>
+            <label>Message:</label><br>
+            <textarea name="message" placeholder="Enter message"></textarea><br><br>
+            <button type="submit">Send Notification</button>
+        </form>
+    """
 
 @app.route("/logout")
 @login_required

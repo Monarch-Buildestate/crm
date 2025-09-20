@@ -12,9 +12,8 @@
         "maintainer": "YOUR WEBHOOK URL",
         "events": "YOUR WEBHOOK"
     },
-    "webpush":{
-        "public_key": "",
-        "private_key": "",
-        "sender_info": ""
+    "onesignal": {
+        "api_key": "YOUR ONESIGNAL REST API KEY",
+        "app_id": "YOUR ONESIGNAL APP ID"
     }
 }

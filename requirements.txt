@@ -3,4 +3,4 @@ flask-login
 flask-wtf
 pytz
 discord_webhook 
-flask-pywebpush
+onesignal-python-api
