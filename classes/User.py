@@ -18,6 +18,7 @@ class User(UserMixin):
         self.admin = True if self.id == 1 else False
         self.available_for_lead = available_for_lead
         self.created_at = created_at
+        self.logged_in = True
 
 
     def get_id(self):
