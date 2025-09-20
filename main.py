@@ -225,7 +225,7 @@ def onesignal_sdk_worker():
     return send_file("static/assets/js/OneSignalSDKWorker.js", mimetype="application/javascript")
     
 
-def post_notification(user_id:int, title:str, message:str, href:str=""):
+def post_notification(user:User, title:str, message:str, href:str=""):
     if href and href.startswith("/"):
         href = request.host_url[:-1] + href
     if not ONESIGNAL_APP_ID or not ONESIGNAL_API_KEY:
@@ -237,7 +237,7 @@ def post_notification(user_id:int, title:str, message:str, href:str=""):
     }
     payload = {
         "app_id": ONESIGNAL_APP_ID,
-        "include_external_user_ids": [str(user_id)],  # target logged-in user
+        "include_external_user_ids": [f"{user.name}-{user.id}"],  # target logged-in user
         "headings": {"en": title},
         "contents": {"en": message},
         "url": href
@@ -332,9 +332,13 @@ def assign_lead(lead_id):
     new_user_id = request.form.get("new_assignee")
     if not new_user_id:
         return redirect(url_for("lead", lead_id=lead_id))
+    user = User.get(new_user_id, conn)
+    if not user:
+        return redirect(url_for("lead", lead_id=lead_id))
     lead = Lead.get(lead_id, conn)
     lead.assign(new_user_id, conn)
-    post_notification(f"{new_user_id}", "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
+    
+    post_notification(user, "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
     return redirect(url_for("lead", lead_id=lead_id))
 
 
@@ -362,7 +366,7 @@ def bulk_assign(user_id, lead_ids):
         lead = Lead.get(lead_id, conn)
         if lead:
             lead.assign(user_id, conn)
-            post_notification(f"{user.name}-{user.id}", "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
+            post_notification(user, "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
     return "ok", 200
 
 @app.route("/lead/<lead_id>", methods=["GET"])
