@@ -24,16 +24,14 @@
           showCredit: false,
         },
       });
+
+      {% if current_user.logged_in %}
+        OneSignal.login("{{current_user.name}}-{{ current_user.id }}");
+        console.log("User logged in to OneSignal: {{ current_user.id }}");
+      {% endif %}
     });
   </script>
-  {%if current_user.logged_in %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      OneSignal.login("{{ current_user.id }}");
-      console.log("User logged in to OneSignal: {{ current_user.id }}");
-    });
-  </script>
-  {% endif %}
+
   {% block stylesheets %}{% endblock stylesheets %}
 
 </head>
