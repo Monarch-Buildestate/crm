@@ -224,35 +224,29 @@ def load_user(user_id):
 def onesignal_sdk_worker():
     return send_file("static/assets/js/OneSignalSDKWorker.js", mimetype="application/javascript")
     
-@app.route("/send_notification", methods=["GET", "POST"])
-@login_required 
-def send_notification():
+
+def post_notification(user_id:int, title:str, message:str, href:str=""):
+    if href and href.startswith("/"):
+        href = request.host_url[:-1] + href
     if not ONESIGNAL_APP_ID or not ONESIGNAL_API_KEY:
-        return "OneSignal not configured. Please set ONESIGNAL_APP_ID and ONESIGNAL_API_KEY in config.json"
-    if request.method == "POST":
-        title = request.form.get("title", "Default Title")
-        message = request.form.get("message", "Default Message")
+        return False
+    url = "https://onesignal.com/api/v1/notifications"
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "Authorization": f"Basic {ONESIGNAL_API_KEY}"
+    }
+    payload = {
+        "app_id": ONESIGNAL_APP_ID,
+        "include_external_user_ids": [str(user_id)],  # target logged-in user
+        "headings": {"en": title},
+        "contents": {"en": message},
+        "url": href
+    }
 
-        url = "https://onesignal.com/api/v1/notifications"
-        headers = {
-            "Content-Type": "application/json; charset=utf-8",
-            "Authorization": f"Basic {ONESIGNAL_API_KEY}"
-        }
-        payload = {
-            "app_id": ONESIGNAL_APP_ID,
-            "include_external_user_ids": [str(current_user.id)],  # target logged-in user
-            "headings": {"en": title},
-            "contents": {"en": message}
-        }
+    response = requests.post(url, headers=headers, json=payload)
+    print(response.status_code, response.text)
+    return response.status_code == 200
 
-        response = requests.post(url, headers=headers, json=payload)
-        print(response.status_code, response.text)
-
-
-        return redirect(url_for("send_notification"))
-
-    # Show a simple form to send notifications
-    return render_template("home/subscribe.html")
 
 @app.route("/logout")
 @login_required
@@ -340,6 +334,7 @@ def assign_lead(lead_id):
         return redirect(url_for("lead", lead_id=lead_id))
     lead = Lead.get(lead_id, conn)
     lead.assign(new_user_id, conn)
+    post_notification(f"{new_user_id}", "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
     return redirect(url_for("lead", lead_id=lead_id))
 
 
@@ -367,6 +362,7 @@ def bulk_assign(user_id, lead_ids):
         lead = Lead.get(lead_id, conn)
         if lead:
             lead.assign(user_id, conn)
+            post_notification(f"{user.name}-{user.id}", "Lead Assigned", f"You have been assigned a new lead: {lead.id}", f"/lead/{lead.id}")
     return "ok", 200
 
 @app.route("/lead/<lead_id>", methods=["GET"])
