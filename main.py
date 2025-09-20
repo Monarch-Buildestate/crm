@@ -223,6 +223,9 @@ def login():
 def load_user(user_id):
     return User.get(user_id, conn=conn)
 
+@app.route("/OneSignalSDKWorker.js")
+def onesignal_sdk_worker():
+    return send_file("static/assets/js/OneSignalSDKWorker.js", mimetype="application/javascript")
     
 @app.route("/send_notification", methods=["GET", "POST"])
 def send_notification():
