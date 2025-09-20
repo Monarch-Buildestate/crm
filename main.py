@@ -223,22 +223,10 @@ def login():
 def load_user(user_id):
     return User.get(user_id, conn=conn)
 
-@app.route("/subscribe", methods=["POST", 'GET'])
-@login_required
-def subscribe():
-    if request.method == "GET":
-        return render_template("home/subscribe.html")
-    else:
-        data = request.json.get("sub_token")
-        if not data or "endpoint" not in data:
-            return jsonify({"error": "Invalid subscription"}), 400
-        
-        cur.execute("INSERT INTO subscriptions (user_id, data) values(?,?)", (current_user.id, data))
-        conn.commit()
-        return jsonify({"message": "Subscribed successfully"}), 201
     
 @app.route("/send_notification", methods=["GET", "POST"])
 def send_notification():
+    return "disabled"
     """Send a push notification to Current user as test."""
     data = request.json
     message = data.get("message", "Default Notification")
@@ -256,10 +244,6 @@ def send_notification():
             return f"Web Push failed: {ex}"
 
     return jsonify({"message": "Notification sent"}), 200
-
-@app.route("/sw.js")
-def swjs():
-    return send_file("static/assets/js/sw.js", mimetype="application/javascript")
 
 @app.route("/logout")
 @login_required
