@@ -144,12 +144,5 @@
   <!-- AdminLTE App -->
   <script src="/static/assets/js/adminlte.js"></script>
   <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-  {%if current_user.logged_in %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      OneSignal.login("current_user.id")
-    });
-  </script>
-  {% endif %}
 
 {% endblock javascripts %}
