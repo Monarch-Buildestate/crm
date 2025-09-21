@@ -63,13 +63,9 @@
                   <th>ID</th>
                   <th>Name</th>
                   <th>Next Follow Up</th>
-                  <th>Phone</th>
-                  <th>Created At</th>
                   <th>Updated At</th>
-                  <th>Email</th>
                   <th>Assigned To</th>
                   <th>Lead Status</th>
-                  <th>Address</th>
                   {% if current_user.admin %}
                   <th>Assign</th>
                   {% endif %}
@@ -83,13 +79,9 @@
                 <td>{{ lead.id }}</td>
                 <td><a href="{{ url_for('lead', lead_id=lead.id) }}">{{ lead.name }}</a></td>
                 <td>{{ lead.next_follow_up_time }}</td>
-                <td>{{ lead.phone_number }}</td>
-                <td>{{ lead.created_at }}</td>
                 <td>{{ lead.last_follow_up_time }}</td>
-                <td>{{ lead.email }}</td>
                 <td>{{ lead.assigned_to }}</td>
                 <td>{{ lead.status }}</td>
-                <td>{{ lead.address }}</td>
                 {% if current_user.admin %}
                 <td>
                   <div class="dropdown">
