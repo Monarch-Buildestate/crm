@@ -43,7 +43,7 @@
                   <div class="dropdown-menu">
                     {% for user in all_users %}
                     <a class="dropdown-item bulk-assign-user" data-user="{{ user.id }}" href="#">
-                      ({{ user.id }}) {{ user.name }}
+                      ({{ user.id }}) {{ user.name }} {%if user.available_for_lead %}(Available){% else %}(Not Available){% endif %}
                     </a>
                     {% endfor %}
                   </div>
@@ -70,6 +70,9 @@
                   <th>Assigned To</th>
                   <th>Lead Status</th>
                   <th>Address</th>
+                  {% if current_user.admin %}
+                  <th>Assign</th>
+                  {% endif %}
                 </tr>
               </thead>
               {% for lead in leads %}
@@ -87,6 +90,22 @@
                 <td>{{ lead.assigned_to }}</td>
                 <td>{{ lead.status }}</td>
                 <td>{{ lead.address }}</td>
+                {% if current_user.admin %}
+                <td>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                      Assign
+                    </button>
+                    <div class="dropdown-menu">
+                      {% for user in all_users %}
+                      <a class="dropdown-item single-assign-user" data-user="{{ user.id }}" data-lead="{{ lead.id }}" href="#">
+                        ({{ user.id }}) {{ user.name }} {% if user.available_for_lead %}(Available){% else %}(Not Available){% endif %}
+                      </a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </td>
+                {% endif %}
               </tr>
               {% endfor %}
             </table>
@@ -124,6 +143,26 @@
       });
 
       {% if current_user.admin %}
+      // Single assign
+      $(".single-assign-user").on("click", function(e) {
+        e.preventDefault();
+        let userId = $(this).data("user");
+        let leadId = $(this).data("lead");
+
+        let url = "/leads/bulk/assign/" + userId + "/" + leadId;
+        $.ajax({
+          url: url,
+          method: "POST",
+          success: function() {
+            alert("Lead assigned successfully REFRESHING");
+            location.reload();
+          },
+          error: function() {
+            alert("Lead assignment failed");
+          }
+        });
+      });
+
       // Select/Deselect All
       $("#select-all").on("click", function() {
         $(".lead-select").prop("checked", this.checked);
