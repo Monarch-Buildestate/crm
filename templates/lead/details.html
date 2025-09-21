@@ -157,6 +157,7 @@
           </div>
 
           <div class="lead-details">
+            {% if current_user.admin %}
             <form action="/lead/{{ lead.id }}/assign" method="POST">
               <label>Assign To</label>
               <select class="form-control" name="new_assignee">
@@ -166,8 +167,11 @@
               </select>
               <button class="btn btn-primary mt-2">Assign</button>
             </form>
+            {% endif %}
             <h3>Lead Details ({{lead.id}})</h3>
+            {% if current_user.admin %}
             <h2>Lead For: {{lead.assigned_to}}</h2>
+            {% endif %}
             <h2>Lead Status: {{lead.status}}</h2>
 
             <div class="form-group">
