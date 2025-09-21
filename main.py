@@ -442,18 +442,11 @@ def pending_leads():
         lead.assigned_to = User.get(lead.user_id, conn).username
     pending = []
     for lead in leads:
-        if not lead.follow_ups:
-            pending.append(lead)
-            continue
-        if lead.status == "Not Interested":
-            continue
-        if lead.follow_ups[-1].follow_up_time:
-            if lead.follow_ups[-1].follow_up_time.replace(tzinfo=pytz.timezone("Asia/Kolkata")).date() <= datetime.now(tz=pytz.timezone("Asia/Kolkata")).date(): # if time is gone then add to pending
-                pending.append(lead)
-    if not current_user.admin:
-        for lead in pending:
-            #lead.phone_number = censor_phone_number(lead.phone_number)
-            ...
+        if lead.status != "Not Interested":
+            if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
+                if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
+                    if lead.status != "Not Interested":
+                        pending.append(lead)
     return render_template("lead/lead.html", leads=pending)
 
 @app.route("/lead/<lead_id>/comment", methods=["POST"])
