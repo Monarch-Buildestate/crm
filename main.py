@@ -517,7 +517,7 @@ def create_lead():
         origin = request.form.get("origin", "Manual Added")
         email = request.form["email"]
         address = request.form["city"]
-        lead = Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, origin=origin, conn=conn)
+        lead = Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, origin_id=origin, conn=conn)
         return redirect(url_for("lead", lead_id=lead.id))
     return render_template("lead/create.html")
 
