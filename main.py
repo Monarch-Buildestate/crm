@@ -605,6 +605,8 @@ def add_facebook_lead():
     city = data.get("CITY")
     origin = data.get("ORIGIN")
     phone = data.get("PHONE")
+    print("Data is ...")
+    print(data)
     name = data.get("NAME", "Facebook Lead")
 
     print("City:", city)
