@@ -66,6 +66,7 @@
                   <th>Updated At</th>
                   <th>Assigned To</th>
                   <th>Lead Status</th>
+                  <th>Lead Origin</th>
                   {% if current_user.admin %}
                   <th>Assign</th>
                   {% endif %}
@@ -82,6 +83,7 @@
                 <td>{{ lead.last_follow_up_time }}</td>
                 <td>{{ lead.assigned_to }}</td>
                 <td>{{ lead.status }}</td>
+                <td>{{ lead.origin_id }}</td>
                 {% if current_user.admin %}
                 <td>
                   <div class="dropdown">
