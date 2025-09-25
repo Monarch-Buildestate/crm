@@ -85,6 +85,7 @@ with conn:
             email TEXT, 
             address TEXT, 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            origin_id TEXT,
             FOREIGN KEY(user_id) REFERENCES users(id)
         );"""
     )
@@ -513,10 +514,10 @@ def create_lead():
         phone_number = request.form["number"]
         if len(phone_number) == 10:
             phone_number = "91" + phone_number
-
+        origin = request.form.get("origin", "Manual Added")
         email = request.form["email"]
         address = request.form["city"]
-        lead = Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, conn=conn)
+        lead = Lead.create(name=name, phone_number=phone_number, email=email, address=address, user_id=current_user.id, origin=origin, conn=conn)
         return redirect(url_for("lead", lead_id=lead.id))
     return render_template("lead/create.html")
 
@@ -598,10 +599,11 @@ def add_facebook_lead():
     phone_number = phone_number.replace("+", "")
     city = request.args.get("CITY", "")
     phone_number = phone_number[-10:] # last 10 digits
+    origin_id = request.args.get("ORIGIN", "Unknown")
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
-    
-    new_lead = Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=city)
+
+    new_lead = Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=city, origin_id=origin_id)
     users = User.get_all(conn)
     eligible_users = [user for user in users if user.available_for_lead and user.position > 1]
     if eligible_users:  

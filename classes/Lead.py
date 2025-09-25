@@ -136,15 +136,15 @@ class Lead:
         return None
     
     @staticmethod
-    def create(name=None, phone_number=None, email=None, address=None, user_id=1, conn: sqlite3.Connection = None, notify:bool=True):
+    def create(name=None, phone_number=None, email=None, address=None, user_id=1, origin_id=None, conn: sqlite3.Connection = None, notify:bool=True):
         older_lead = Lead.get_by_phone_number(phone_number, conn)
         if older_lead:
             return older_lead
         with conn:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO lead (name, phone_number, email, address, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-                (name, phone_number, email, address, user_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                "INSERT INTO lead (name, phone_number, email, address, user_id, created_at, origin_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (name, phone_number, email, address, user_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), origin_id),
             )
             conn.commit()
             if notify:
