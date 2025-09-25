@@ -594,6 +594,7 @@ def user_or_lead(number, users:typing.List[User], leads:typing.List[Lead]) -> ty
 
 @app.route("/facebook/lead/add", methods=["POST"])
 def add_facebook_lead():
+    print("Facebook lead received", request.args)
     name = request.args.get("FULL_NAME")
     phone_number = request.args.get("PHONE")
     phone_number = phone_number.replace("+", "")
