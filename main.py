@@ -7,6 +7,8 @@ from flask_login import (
     logout_user,
     current_user,
 )
+from urllib.parse import parse_qs
+
 import pytz
 import random
 import requests
@@ -594,18 +596,19 @@ def user_or_lead(number, users:typing.List[User], leads:typing.List[Lead]) -> ty
 
 @app.route("/facebook/lead/add", methods=["POST"])
 def add_facebook_lead():
-    # Access form data directly
-    city = request.form.get("CITY")
-    origin = request.form.get("ORIGIN")
-    phone = request.form.get("PHONE")
-    name = request.form.get("FULL_NAME")
+    raw = request.get_data(as_text=True)   # get raw body as text
+    parsed = parse_qs(raw)                 # parse into dict with lists
 
-    print("Facebook lead received")
+    # Flatten lists (parse_qs returns {"CITY": ["Bikaner"], ...})
+    data = {k: v[0] for k, v in parsed.items()}
+
+    city = data.get("CITY")
+    origin = data.get("ORIGIN")
+    phone = data.get("PHONE")
+
     print("City:", city)
     print("Origin:", origin)
     print("Phone:", phone)
-
-    # You can return JSON or just OK
     
     name = request.args.get("FULL_NAME")
     phone_number = phone.replace("+", "")
