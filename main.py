@@ -616,7 +616,7 @@ def add_facebook_lead():
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
 
-    new_lead = Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=city, origin_id=origin_id)
+    new_lead = Lead.create(name=name, phone_number=phone_number, user_id=1, conn=conn, address=city, origin_id=origin)
     users = User.get_all(conn)
     eligible_users = [user for user in users if user.available_for_lead and user.position > 1]
     if eligible_users:  
