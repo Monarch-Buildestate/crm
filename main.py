@@ -605,12 +605,12 @@ def add_facebook_lead():
     city = data.get("CITY")
     origin = data.get("ORIGIN")
     phone = data.get("PHONE")
+    name = data.get("NAME", "Facebook Lead")
 
     print("City:", city)
     print("Origin:", origin)
     print("Phone:", phone)
     
-    name = request.args.get("FULL_NAME")
     phone_number = phone.replace("+", "")
     phone_number = phone_number[-10:] # last 10 digits
     if Lead.get_by_phone_number(phone_number, conn):
