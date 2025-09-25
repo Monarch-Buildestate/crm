@@ -592,7 +592,7 @@ def user_or_lead(number, users:typing.List[User], leads:typing.List[Lead]) -> ty
         if lead.phone_number == number:
             return lead
 
-@app.route("/facebook/lead/add")
+@app.route("/facebook/lead/add", methods=["POST"])
 def add_facebook_lead():
     name = request.args.get("FULL_NAME")
     phone_number = request.args.get("PHONE")
