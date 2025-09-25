@@ -25,6 +25,7 @@ class Lead:
             self.phone_number = "91" + "".join(filter(str.isdigit, self.phone_number))
         self.email = '' if str(query[4]) == "None" else query[4]
         self.address = '' if str(query[5]) == "None" else query[5]
+        self.origin_id = query[7] if query[7] else "Unknown"
         with conn:
             self.comments = self.get_comments(conn)
             self.follow_ups = self.get_follow_ups(conn)
