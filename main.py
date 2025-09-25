@@ -594,16 +594,22 @@ def user_or_lead(number, users:typing.List[User], leads:typing.List[Lead]) -> ty
 
 @app.route("/facebook/lead/add", methods=["POST"])
 def add_facebook_lead():
-    print("Facebook lead received", request.args)
-    print("Headers:", request.headers)
-    print("Body:", request.get_data())
+    # Access form data directly
+    city = request.form.get("CITY")
+    origin = request.form.get("ORIGIN")
+    phone = request.form.get("PHONE")
+    name = request.form.get("FULL_NAME")
+
+    print("Facebook lead received")
+    print("City:", city)
+    print("Origin:", origin)
+    print("Phone:", phone)
+
+    # You can return JSON or just OK
     
     name = request.args.get("FULL_NAME")
-    phone_number = request.args.get("PHONE")
-    phone_number = phone_number.replace("+", "")
-    city = request.args.get("CITY", "")
+    phone_number = phone.replace("+", "")
     phone_number = phone_number[-10:] # last 10 digits
-    origin_id = request.args.get("ORIGIN", "Unknown")
     if Lead.get_by_phone_number(phone_number, conn):
         return "Lead already exists"
 
