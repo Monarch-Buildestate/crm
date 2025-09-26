@@ -67,6 +67,7 @@
                   <th>Assigned To</th>
                   <th>Lead Status</th>
                   <th>Lead Origin</th>
+                  <th>Lead Phone</th>
                   {% if current_user.admin %}
                   <th>Assign</th>
                   {% endif %}
@@ -84,6 +85,7 @@
                 <td>{{ lead.assigned_to }}</td>
                 <td>{{ lead.status }}</td>
                 <td>{{ lead.origin_id }}</td>
+                <td>{{ lead.phone_number }}</td>
                 {% if current_user.admin %}
                 <td>
                   <div class="dropdown">
