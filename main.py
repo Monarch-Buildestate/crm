@@ -620,7 +620,7 @@ def add_facebook_lead():
     users = User.get_all(conn)
     eligible_users = [user for user in users if user.available_for_lead and user.position > 1]
     if eligible_users:  
-        mode = -1 # round robin
+        mode = -2 # on my own
         if mode == 0: # random
             assignee = random.choice(eligible_users)
         elif mode == 1: # round robin
@@ -646,6 +646,15 @@ def add_facebook_lead():
             assignee = min(eligible_users, key=lambda u: user_lead_counts[u.id])
         elif mode == -1:
             assignee = User.get(1, conn) # assign to admin
+        elif mode == -2:
+            # custom logic here
+            if "mon" in origin.lower(): # True for Monarch leads
+                users = User.get_all(conn)
+                for u in users:
+                    if "swati" in u.username.lower():
+                        assignee = u
+                        break
+                
         new_lead.assign(assignee.id, conn)
 
         # make logic here to assign
