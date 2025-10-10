@@ -440,16 +440,16 @@ def delete_lead(lead_id):
 @app.route("/lead/pending")
 @login_required
 def pending_leads():
-    leads = current_user.get_leads(conn)
-    for lead in leads:
-        lead.assigned_to = User.get(lead.user_id, conn).username
     pending = []
+    leads = current_user.get_leads(conn)
     for lead in leads:
         if lead.status != "Not Interested":
             if lead.follow_ups and lead.follow_ups[-1].follow_up_time:
                 if lead.follow_ups[-1].follow_up_time.date() == datetime.now().date():
                     if lead.status != "Not Interested":
                         pending.append(lead)
+            else:
+                pending.append(lead)
     return render_template("lead/lead.html", leads=pending)
 
 @app.route("/lead/<lead_id>/comment", methods=["POST"])
