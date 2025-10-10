@@ -211,7 +211,10 @@
                 <span id="origin-display">{{ lead.origin_id }}</span>
               </span>
             </div>
-            
+            <div class="form-group">
+              <label>Created At</label>
+              <span>{{ lead.created_at.strftime('%d %b %Y %H:%M') }}</span>
+            </div>
 
             <a href="tel:{{ lead.phone_number }}" id="lead-call-button"><button class="btn btn-primary"><i class="fa-solid fa-phone"></i></button></a>
             <a href="https://wa.me/{{ lead.phone_number }}" id="lead-whatsapp-button"><button class="btn btn-primary"><i class="fa-brands fa-whatsapp"></i></button></a>
